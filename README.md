@@ -6,4 +6,4 @@
 * [Part 3](https://bitbucket.org/patras/cslp-16-17/src/79c1bda2c12360554bb9249ed5e6dbca37a1a730/part3_assessment.txt?at=master&fileviewer=file-view-default): Wednesday 21st December, 2016 at 16:00; worth 50% of the marks.
 
 ## Scoreboard
-Your code will be automatically tested on a weekly basis and you will be able to keep track of your progress to a scoreboard soon to be linked here.
+Your code will be automatically tested on a weekly basis and you will be able to keep track of your progress to the [scoreboard](https://patras.bitbucket.io/).
