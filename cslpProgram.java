@@ -1,4 +1,7 @@
-import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
+
+
 
 class cslpProgram {
 
@@ -18,52 +21,57 @@ class cslpProgram {
 
 	public static void main(String args[]) {
 		parseInput(args);
+		
 		for (int i=0; i < areaMatricesArray.size(); i++) {
 			System.out.println(areaMatricesArray.get(i).toString());
 		}
 	}
 
 	public static void parseInput(String args[]) {
-		// Search Input File for Data \\
-		for (int i = 0; i < args.length; i++) {
-			// Store Simple Variables \\
-			if (args[i].equals("lorryVolume")) {	
-				lorryVolume = Integer.parseInt(args[i+1]);
-			} else if (args[i].equals("lorryMaxLoad")) {
-				lorryMaxLoad = Integer.parseInt(args[i+1]);
-			} else if (args[i].equals("binServiceTime")) {
-				binServiceTime = Float.parseFloat(args[i+1]);
-			} else if (args[i].equals("binVolume")) {
-				binVolume = Float.parseFloat(args[i+1]);
-			} else if (args[i].equals("disposalDistrRate")) {
-				disposalDistrRate = Float.parseFloat(args[i+1]);
-			} else if (args[i].equals("disposalDistrShape")) {
-				disposalDistrShape = Integer.parseInt(args[i+1]);
-			} else if (args[i].equals("bagVolume")) {
-				bagVolume = Float.parseFloat(args[i+1]);
-			} else if (args[i].equals("bagWeightMin")) {
-				bagWeightMin = Float.parseFloat(args[i+1]);
-			} else if (args[i].equals("bagWeightMax")) {
-				bagWeightMax = Float.parseFloat(args[i+1]);
+		// Open file
+		readfile r = new readfile();
+		r.openFile(args[0]);
+		ArrayList<String> input = r.readFile();
+		r.closeFile();
+
+		for (int i = 0; i < input.size(); i++) {
+			if (input.get(i).equals("lorryVolume")) {	
+				lorryVolume = Integer.parseInt(input.get(i+1));
+			} else if (input.get(i).equals("lorryMaxLoad")) {
+				lorryMaxLoad = Integer.parseInt(input.get(i+1));
+			} else if (input.get(i).equals("binServiceTime")) {
+				binServiceTime = Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("binVolume")) {
+				binVolume = Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("disposalDistrRate")) {
+				disposalDistrRate = Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("disposalDistrShape")) {
+				disposalDistrShape = Integer.parseInt(input.get(i+1));
+			} else if (input.get(i).equals("bagVolume")) {
+				bagVolume = Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("bagWeightMin")) {
+				bagWeightMin = Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("bagWeightMax")) {
+				bagWeightMax = Float.parseFloat(input.get(i+1));
 			}
 			// Store Area Maps \\
-			  else if (args[i].equals("areaIdx")) {
+			  else if (input.get(i).equals("areaIdx")) {
 			  	// New Area discovered, instantiate areaMapMatrix
-			  	int areaIdx 		= Integer.parseInt(args[i+1]);
-			  	float serviceFreq 	= Float.parseFloat(args[i+3]);
-			  	float thresholdVal 	= Float.parseFloat(args[i+5]);
-			  	int noBins			= Integer.parseInt(args[i+7]);
+			  	int areaIdx 		= Integer.parseInt(input.get(i+1));
+			  	float serviceFreq 	= Float.parseFloat(input.get(i+3));
+			  	float thresholdVal 	= Float.parseFloat(input.get(i+5));
+			  	int noBins			= Integer.parseInt(input.get(i+7));
 			  	int[][] roadMatrix 	= new int[noBins+1][noBins+1];
 			  	// Move down input until you reach next roadsLayout
-			  	while (!args[i].equals("roadsLayout")) {
+			  	while (!input.get(i).equals("roadsLayout")) {
 			  		i++;
 			  	}
 			  	// Populate roadMatrix \\
-			  	if (args[i].equals("roadsLayout")) {
+			  	if (input.get(i).equals("roadsLayout")) {
 			  		i++;
 			  		for (int j=0; j < (noBins+1); j++) {
 			  			for (int k=0; k < (noBins+1); k++) {
-			  				roadMatrix[j][k] = Integer.parseInt(args[i+j+k]);
+			  				roadMatrix[j][k] = Integer.parseInt(input.get(i+j+k));
 			  			}
 			  			i = i + noBins;
 			  		}
@@ -72,16 +80,13 @@ class cslpProgram {
 			  	areaMapMatrix currentAreaMatrix = new areaMapMatrix(areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix);
 			  	areaMatricesArray.add(currentAreaMatrix);
 			} 
-
 			// Store final two variables \\
-			  else if (args[i].equals("stopTime")) {
-				stopTime 	= Float.parseFloat(args[i+1]);
-			} else if (args[i].equals("warmUpTime")) {
-				warmUpTime 	= Float.parseFloat(args[i+1]);
+			  else if (input.get(i).equals("stopTime")) {
+				stopTime 	= Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("warmUpTime")) {
+				warmUpTime 	= Float.parseFloat(input.get(i+1));
 			}
 		}
+
 	}
-
-
-
 }
