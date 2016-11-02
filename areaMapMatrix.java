@@ -1,34 +1,42 @@
 class areaMapMatrix {
 	
-	private int areaIdx;
-	private float serviceFreq;
-	private float thresholdVal;
-	private int noBins;
-	private int[][] roadsLayout;
+	public int areaIdx;
+	public float serviceFreq;
+	public float thresholdVal;
+	public int noBins;
+	public int[][] roadsLayout;
+	public float binVolume;
+	public float disposalDistrRate;
+	public int disposalDistrShape;
+	public float bagVolume;
+	public float bagWeightMin;
+	public float bagWeightMax;
 
-	public areaMapMatrix(int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][]) {
-		this.areaIdx = areaIdx;
-		this.serviceFreq = serviceFreq;
-		this.thresholdVal = thresholdVal;
-		this.noBins = noBins;
-		this.roadsLayout = roadsLayout;
-	}
+	public bin[] binArray;
 
-	public int getAreaIdx() {
-		return this.areaIdx;
+	public areaMapMatrix(int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax) {
+		this.areaIdx 			= areaIdx;
+		this.serviceFreq 		= serviceFreq;
+		this.thresholdVal 		= thresholdVal;
+		this.noBins 			= noBins;
+		this.roadsLayout 		= roadsLayout;
+		this.binVolume			= binVolume;
+		this.disposalDistrRate	= disposalDistrRate;
+		this.disposalDistrShape	= disposalDistrShape;
+		this.bagVolume			= bagVolume;
+		this.bagWeightMin		= bagWeightMin;
+		this.bagWeightMax		= bagWeightMax;
+		binArray 				= setUpBins();
 	}
-
-	public float getServiceFreq() {
-		return this.serviceFreq;
+	
+	private bin[] setUpBins() {
+		bin[] output = new bin[this.noBins];
+		for (int i = 0; i < this.noBins; i++) {
+			output[i] = new bin(binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+		}
+		return output;
 	}
-
-	public float getThresholdVal() {
-		return this.thresholdVal;
-	}
-
-	public int getNoBins() {
-		return this.noBins;
-	}
+	
 
 	public String toString() {
 		String output = "";
