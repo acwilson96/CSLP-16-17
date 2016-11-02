@@ -15,5 +15,5 @@ if [[ "$runProg" == 1 ]]
 	then
 		echo "Starting simulation"
 		echo ""
-		java cslpProgram $input
+		java simStart $input
 fi
