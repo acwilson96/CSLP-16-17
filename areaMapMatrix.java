@@ -1,5 +1,9 @@
+import java.util.*;
+
 class areaMapMatrix {
 	
+	public int currTime;
+
 	public int areaIdx;
 	public float serviceFreq;
 	public float thresholdVal;
@@ -12,9 +16,10 @@ class areaMapMatrix {
 	public float bagWeightMin;
 	public float bagWeightMax;
 
-	public bin[] binArray;
+	public ArrayList<bin> binList = new ArrayList<bin>();
 
-	public areaMapMatrix(int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax) {
+	public areaMapMatrix(int currTime, int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax) {
+		this.currTime			= currTime;
 		this.areaIdx 			= areaIdx;
 		this.serviceFreq 		= serviceFreq;
 		this.thresholdVal 		= thresholdVal;
@@ -26,18 +31,18 @@ class areaMapMatrix {
 		this.bagVolume			= bagVolume;
 		this.bagWeightMin		= bagWeightMin;
 		this.bagWeightMax		= bagWeightMax;
-		binArray 				= setUpBins();
-	}
-	
-	private bin[] setUpBins() {
-		bin[] output = new bin[this.noBins];
-		for (int i = 0; i < this.noBins; i++) {
-			output[i] = new bin(binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
-		}
-		return output;
-	}
-	
+		setUpBins();
 
+	}
+	
+	private void setUpBins() {
+		for (int i = 0; i <= this.noBins; i++) {
+			bin aBin = new bin(i, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax, thresholdVal);
+			binList.add(aBin);
+			binList.get(i).updateDisposalInterval(currTime);
+		}
+	}
+	
 	public String toString() {
 		String output = "";
 		for (int i=0; i <= this.noBins; i++) {

@@ -2,6 +2,8 @@ import java.util.*;
 
 class Simulator {
 
+	public static int currTime;
+
 	public static int lorryVolume;
 	public static int lorryMaxLoad;
 	public static float binServiceTime;
@@ -16,12 +18,16 @@ class Simulator {
 	public static float stopTime;
 	public static float warmUpTime;
 	public static ArrayList<String> input;
+
+	public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	
 	public Simulator(String args[]) {
 		readfile r = new readfile();
 		r.openFile(args[0]);
 		input = r.readFile();
 		r.closeFile();
+		this.currTime = 0;
+
 	}
 
 	public void parseInput() {
@@ -44,6 +50,8 @@ class Simulator {
 				bagWeightMin = Float.parseFloat(input.get(i+1));
 			} else if (input.get(i).equals("bagWeightMax")) {
 				bagWeightMax = Float.parseFloat(input.get(i+1));
+			} else if (input.get(i).equals("noAreas")) {
+				noAreas = Integer.parseInt(input.get(i+1));
 			}
 			// Store Area Maps \\
 			  else if (input.get(i).equals("areaIdx")) {
@@ -68,7 +76,7 @@ class Simulator {
 			  		}
 			  	}
 			  	// Save area map to array \\
-			  	areaMapMatrix currentAreaMatrix = new areaMapMatrix(areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+			  	areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
 			  	areaMatricesArray.add(currentAreaMatrix);
 			} 
 			// Store final two variables \\
@@ -79,10 +87,38 @@ class Simulator {
 			}
 		}
 		
-		for (int i=0; i < areaMatricesArray.size(); i++) {
-			System.out.println(areaMatricesArray.get(i).toString());
-		}
-		
 	}
-	
+
+	public void simOutline() {
+		while (this.currTime < this.stopTime) {
+			determineSetOfEvents();
+			//chooseNextEvent();
+
+		}
+	}
+
+	public void determineSetOfEvents() {
+		System.out.println("Determining Set of Events");
+		for (int i = 0; i < noAreas; i++) {
+			int currNoBins = areaMatricesArray.get(i).noBins;
+			for (int j = 1; j <= currNoBins; j++) {
+				if (areaMatricesArray.get(i).binList.get(j).isBagDisposed(currTime)) {
+					Event nextEvent = new Event(1, i, j, 0);
+					nextPossEvents.add(nextEvent);
+				}
+				if (areaMatricesArray.get(i).binList.get(j).isThresholdExceeded()) {
+					Event nextEvent = new Event(2, i, j, 0);
+					nextPossEvents.add(nextEvent);
+				}
+				if (areaMatricesArray.get(i).binList.get(j).isBinOverflowed()) {
+					Event nextEvent = new Event(3, i, j, 0);
+					nextPossEvents.add(nextEvent);
+				}
+				
+			}
+
+		}
+
+	}
+
 }
