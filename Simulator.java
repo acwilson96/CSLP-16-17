@@ -82,6 +82,7 @@ class Simulator {
 			// Store final two variables \\
 			  else if (input.get(i).equals("stopTime")) {
 				stopTime 	= Float.parseFloat(input.get(i+1));
+				stopTime	= stopTime * 60 * 60;
 			} else if (input.get(i).equals("warmUpTime")) {
 				warmUpTime 	= Float.parseFloat(input.get(i+1));
 			}
@@ -89,36 +90,55 @@ class Simulator {
 		
 	}
 
+	
+	
 	public void simOutline() {
+		System.out.println("simOutline");
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
-			//chooseNextEvent();
-
+			System.out.println("NUMBER OF EVENTS STORED = " + nextPossEvents.size());
+			System.out.println();
+			//Event nextEvent = chooseNextEvent();
+			currTime ++;
+			if (nextPossEvents.size() == 5) { break; }
 		}
 	}
 
+	
+	
 	public void determineSetOfEvents() {
 		System.out.println("Determining Set of Events");
+		//nextPossEvents.clear();
 		for (int i = 0; i < noAreas; i++) {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			for (int j = 1; j <= currNoBins; j++) {
+
+				System.out.println();
+				System.out.println("currTime = " + currTime);
+				System.out.println("timeOfNextBag in bin = " + areaMatricesArray.get(i).binList.get(j).timeOfNextBag);
+
 				if (areaMatricesArray.get(i).binList.get(j).isBagDisposed(currTime)) {
 					Event nextEvent = new Event(1, i, j, 0);
 					nextPossEvents.add(nextEvent);
-				}
-				if (areaMatricesArray.get(i).binList.get(j).isThresholdExceeded()) {
-					Event nextEvent = new Event(2, i, j, 0);
-					nextPossEvents.add(nextEvent);
-				}
-				if (areaMatricesArray.get(i).binList.get(j).isBinOverflowed()) {
-					Event nextEvent = new Event(3, i, j, 0);
-					nextPossEvents.add(nextEvent);
+					areaMatricesArray.get(i).binList.get(j).updateDisposalInterval(currTime);
 				}
 				
 			}
 
 		}
 
+	}
+
+	public Event chooseNextEvent() {
+		int lowestDelay		 =	nextPossEvents.get(0).getDelay();
+		int lowestDelayIndex =	0;
+		for (int i = 0; i < nextPossEvents.size(); i++) {
+			if (nextPossEvents.get(i).getDelay() < lowestDelay) {
+				lowestDelay 		= nextPossEvents.get(i).getDelay();
+				lowestDelayIndex	= i;
+			}
+		}
+		return nextPossEvents.get(lowestDelayIndex);
 	}
 
 }

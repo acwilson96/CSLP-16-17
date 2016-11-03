@@ -39,7 +39,6 @@ class areaMapMatrix {
 		for (int i = 0; i <= this.noBins; i++) {
 			bin aBin = new bin(i, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax, thresholdVal);
 			binList.add(aBin);
-			binList.get(i).updateDisposalInterval(currTime);
 		}
 	}
 	
@@ -58,6 +57,12 @@ class areaMapMatrix {
 			}
 		}
 		return output;
+	}
+
+	public void checkBins() {
+		for (int i = 0; i <= this.noBins; i++) {
+			System.out.println(binList.get(i).timeOfNextBag);
+		}
 	}
 
 }

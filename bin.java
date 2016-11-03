@@ -2,20 +2,20 @@ import java.math.*;
 
 class bin {
 
-	public static int binNo;
-	public static float binVolume;
-	public static float disposalDistrRate;
-	public static int disposalDistrShape;
-	public static float bagVolume;
-	public static float bagWeightMin;
-	public static float bagWeightMax;
-	public static float thresholdVal;
+	public int binNo;
+	public float binVolume;
+	public float disposalDistrRate;
+	public int disposalDistrShape;
+	public float bagVolume;
+	public float bagWeightMin;
+	public float bagWeightMax;
+	public float thresholdVal;
 
-	public static float currVol;
+	public float currVol;
 
-	public static float erlangMean;
-	public static int currTime;
-	public static double timeOfNextBag;
+	public float erlangMean;
+	public int currTime;
+	public int timeOfNextBag;
 
 
 	public bin(int binNo, float binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax, float thresholdVal) {
@@ -29,31 +29,16 @@ class bin {
 		this.thresholdVal			= 	thresholdVal;
 		this.currVol 				=	0;
 		this.erlangMean				=	disposalDistrShape / disposalDistrRate;
+		updateDisposalInterval(0);
 	}
 
-	public double rand() {
-		double output = 0;
-		while (true) {
-			if (output == 0 || output == 1) {
-				output = Math.random();
-			}
-			else { break; }
-		}
-		return output;
-	}
 
 	public void updateDisposalInterval(int time) {
 		this.currTime			=	time;
 		double numBagsPerHour	=	-1 * this.erlangMean * Math.log(rand());
-		this.timeOfNextBag		=	60 / numBagsPerHour;
-		this.timeOfNextBag		=	Math.round(this.timeOfNextBag * 1000.0) / 1000.0;	
+		double nextBag 			=	60 / numBagsPerHour;
+		this.timeOfNextBag		=	(int) nextBag + currTime;
 	}
-
-	public float getCurrVol() {
-		return this.currVol;
-	}
-
-
 
 	public boolean isBagDisposed(int currTime) {
 		if (currTime < timeOfNextBag)		{ return false; }
@@ -69,6 +54,17 @@ class bin {
 		if (this.currVol > binVolume) 		{ return true;  }
 		else 								{ return false; }
 	
+	}
+
+	public double rand() {
+		double output = 0;
+		while (true) {
+			if (output == 0 || output == 1) {
+				output = Math.random();
+			}
+			else { break; }
+		}
+		return output;
 	}
 
 }
