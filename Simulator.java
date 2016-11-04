@@ -23,16 +23,18 @@ class Simulator {
 	public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	
 	public Simulator(String args[]) {
+		// Read input file, ArrayList input = list of words in input file.
 		readfile r = new readfile();
 		r.openFile(args[0]);
 		input = r.readFile();
 		r.closeFile();
 		this.currTime = 0;
-
 	}
 
 	public void parseInput() {
+		// Loop through every word in the input file.
 		for (int i = 0; i < input.size(); i++) {
+			// If the word = a keyword such as a variable, store the next value
 			if (input.get(i).equals("lorryVolume")) {	
 				lorryVolume = Integer.parseInt(input.get(i+1));
 			} else if (input.get(i).equals("lorryMaxLoad")) {
@@ -104,10 +106,14 @@ class Simulator {
 	
 	
 	public void determineSetOfEvents() {
+		// Clear possible events so that old events don't interfere and create infinite loop of same event being triggered.
 		nextPossEvents.clear();
+		// Loop through all the areas
 		for (int i = 0; i < noAreas; i++) {
 			int currNoBins = areaMatricesArray.get(i).noBins;
+			// Loop through all the bins in said area.
 			for (int j = 1; j <= currNoBins; j++) {
+				// Store the time until each bin in that area has a bag disposed.
 				int delay = getBin(i,j).timeUntilNextDisposal(currTime);
 				Event nextEvent = new Event(1, i, j, delay);
 				nextPossEvents.add(nextEvent);
@@ -118,9 +124,12 @@ class Simulator {
 	}
 
 	public Event chooseNextEvent() {
+		// Initialise the output Event to be the first in the list of saved events.
 		int lowestDelay		 =	nextPossEvents.get(0).getDelay();
 		int lowestDelayIndex =	0;
+		// Loop through all possible events
 		for (int i = 0; i < nextPossEvents.size(); i++) {
+			// If an event in list happens before currently saved 'soonest' event, update it.
 			if (nextPossEvents.get(i).getDelay() < lowestDelay) {
 				lowestDelay 		= nextPossEvents.get(i).getDelay();
 				lowestDelayIndex	= i;
@@ -130,16 +139,24 @@ class Simulator {
 	}
 
 	public void triggerNextEvent(Event nextEvent) {
+		// Bag disposed in bin event.
 		if (nextEvent.eventType == 1) {
+			// Update system time to catch up to this event.
+			this.currTime = this.currTime + nextEvent.getDelay();
+			// Extract relevant data from next event to output and update system
 			int binNum				= nextEvent.binNo;
 			int areaNum				= nextEvent.areaNo;
+			// binX.disposeBag() returns weight of bag disposed and updates binX's volume and weight
 			float bagWeight 		= getBin(areaNum, binNum).disposeBag();
 			float binVol 			= (float) Math.round(getBin(areaNum, binNum).currVol * 10) /10;
 			float binWeight			= (float) Math.round(getBin(areaNum, binNum).currWeight * 10) /10;
+			// Output information about bag disposed event
 			String bagOutput		= timeToString() + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
 			String binOutput 		= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
 			System.out.println(bagOutput);
 			System.out.println(binOutput);
+
+			// Check to see if the bins volume exceeds a threshold or if the bin is overflowing
 			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
 					String threshOutput		= timeToString() + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
 					getBin(areaNum, binNum).thresholdReported = true;
@@ -150,14 +167,14 @@ class Simulator {
 					getBin(areaNum, binNum).overflowReported = true;
 					System.out.println(overflowOutput);
 			}
-			this.currTime = this.currTime + nextEvent.getDelay();
+			// Update this bin's time of next disposal
 			getBin(areaNum, binNum).updateDisposalInterval(currTime);
 		}
 
 
 	}
 
-	public String timeToString() {
+	public String timeToString() { // Returns current system time as a string
 		int days 		= (int) currTime / 86400;
 		String daysS 	= String.format("%02d", days);
 		int hours		= (int) (currTime % 86400 ) / 3600 ;
@@ -170,7 +187,7 @@ class Simulator {
 		return output;
 	}
 
-	public bin getBin(int areaNo, int binNo) {
+	public bin getBin(int areaNo, int binNo) { // Returns bin number binNo in area number areaNo
 		bin output = areaMatricesArray.get(areaNo).binList.get(binNo);
 		return output;
 	}

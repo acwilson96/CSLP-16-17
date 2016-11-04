@@ -15,6 +15,7 @@ class areaMapMatrix {
 	public float bagVolume;
 	public float bagWeightMin;
 	public float bagWeightMax;
+	public binLorry lorry;
 
 	public ArrayList<bin> binList = new ArrayList<bin>();
 
@@ -31,18 +32,19 @@ class areaMapMatrix {
 		this.bagVolume			= bagVolume;
 		this.bagWeightMin		= bagWeightMin;
 		this.bagWeightMax		= bagWeightMax;
+		this.lorry				= new binLorry();
 		setUpBins();
 
 	}
 	
-	private void setUpBins() {
+	private void setUpBins() { // Initialises the bins in this area.
 		for (int i = 0; i <= this.noBins; i++) {
 			bin aBin = new bin(i, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax, thresholdVal);
 			binList.add(aBin);
 		}
 	}
 	
-	public String toString() {
+	public String toString() { // Returns string map of this area (used for testing)
 		String output = "";
 		for (int i=0; i <= this.noBins; i++) {
 			for (int j=0; j <= this.noBins; j++) {
@@ -58,11 +60,4 @@ class areaMapMatrix {
 		}
 		return output;
 	}
-
-	public void checkBins() {
-		for (int i = 0; i <= this.noBins; i++) {
-			System.out.println(binList.get(i).timeOfNextBag);
-		}
-	}
-
 }

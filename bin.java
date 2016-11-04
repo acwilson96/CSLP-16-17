@@ -41,11 +41,11 @@ class bin {
 		updateDisposalInterval(0);
 	}
 
-	public int timeUntilNextDisposal(int currTime) {
+	public int timeUntilNextDisposal(int currTime) { // Returns time until next bag is disposed
 		return timeOfNextBag - currTime;
 	}
 
-	public float disposeBag() {
+	public float disposeBag() { // Updates instance with new weight and volume, and returns the weight of bag just disposed.
 		this.currVol	=	this.currVol + bagVolume;
 		float bagWeight = 	(float) (Math.random() * (bagWeightMax - bagWeightMin)) + bagWeightMin;
 		bagWeight 		= 	(float) Math.round(bagWeight * 10) /10;
@@ -53,25 +53,25 @@ class bin {
 		return bagWeight;
 	}
 
-	public void updateDisposalInterval(int time) {
+	public void updateDisposalInterval(int time) { // Generates the time of next bag disposal for this bin
 		this.currTime			=	time;
 		double numBagsPerHour	=	-1 * this.erlangMean * Math.log(rand());
 		double nextBag 			=	3600 / numBagsPerHour;
 		this.timeOfNextBag		=	(int) nextBag + currTime;
 	}
 
-	public boolean isThresholdExceeded() {
+	public boolean isThresholdExceeded() { // Returns whether the threshold has been exceeded
 		if (this.currVol > thresholdVol) 	{ return true;  }
 		else 								{ return false; }
 	}
 
-	public boolean isBinOverflowed() {
+	public boolean isBinOverflowed() { // Returns whether the bin has overflowed
 		if (this.currVol > binVolume) 		{ return true;  }
 		else 								{ return false; }
 	
 	}
 
-	public double rand() {
+	public double rand() { // Generates random number between 0 and 1 exclusive
 		double output = 0;
 		while (true) {
 			if (output == 0 || output == 1) {
