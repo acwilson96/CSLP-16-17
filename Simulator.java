@@ -96,12 +96,8 @@ class Simulator {
 	public void simOutline() {
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
-			if (nextPossEvents.size() > 0) {
-				Event nextEvent = chooseNextEvent();
-				triggerNextEvent(nextEvent);
-			} else {
-				this.currTime++;
-			}
+			Event nextEvent = chooseNextEvent();
+			triggerNextEvent(nextEvent);
 		}
 	}
 
@@ -112,15 +108,9 @@ class Simulator {
 		for (int i = 0; i < noAreas; i++) {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			for (int j = 1; j <= currNoBins; j++) {
-				if (getBin(i,j).isBagDisposed(currTime)) {
-					
-					Event nextEvent = new Event(1, i, j, 0);
-					nextPossEvents.add(nextEvent);
-					areaMatricesArray.get(i).binList.get(j).updateDisposalInterval(currTime);
-				}
-				
-				
-				
+				int delay = getBin(i,j).timeUntilNextDisposal(currTime);
+				Event nextEvent = new Event(1, i, j, delay);
+				nextPossEvents.add(nextEvent);
 			}
 
 		}
@@ -152,15 +142,16 @@ class Simulator {
 			System.out.println(binOutput);
 			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
 					String threshOutput		= timeToString() + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
-					System.out.println(threshOutput);
 					getBin(areaNum, binNum).thresholdReported = true;
+					System.out.println(threshOutput);
 			}
 			if (getBin(areaNum, binNum).isBinOverflowed() && getBin(areaNum, binNum).overflowReported == false) {
 					String overflowOutput		= timeToString() + " -> bin " + areaNum + "." + binNum + " overflowed";
-					System.out.println(overflowOutput);
 					getBin(areaNum, binNum).overflowReported = true;
+					System.out.println(overflowOutput);
 			}
-				
+			this.currTime = this.currTime + nextEvent.getDelay();
+			getBin(areaNum, binNum).updateDisposalInterval(currTime);
 		}
 
 

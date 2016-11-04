@@ -41,9 +41,8 @@ class bin {
 		updateDisposalInterval(0);
 	}
 
-	public boolean isBagDisposed(int currTime) {
-		if (currTime < timeOfNextBag)		{ return false; }
-		else								{ return true;  }
+	public int timeUntilNextDisposal(int currTime) {
+		return timeOfNextBag - currTime;
 	}
 
 	public float disposeBag() {
