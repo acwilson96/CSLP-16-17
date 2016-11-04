@@ -112,15 +112,18 @@ class Simulator {
 		for (int i = 0; i < noAreas; i++) {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			for (int j = 1; j <= currNoBins; j++) {
-
-				System.out.println();
-				System.out.println("currTime = " + currTime);
-				System.out.println("timeOfNextBag in bin = " + areaMatricesArray.get(i).binList.get(j).timeOfNextBag);
-
 				if (areaMatricesArray.get(i).binList.get(j).isBagDisposed(currTime)) {
 					Event nextEvent = new Event(1, i, j, 0);
 					nextPossEvents.add(nextEvent);
 					areaMatricesArray.get(i).binList.get(j).updateDisposalInterval(currTime);
+				}
+				if (areaMatricesArray.get(i).binList.get(j).isThresholdExceeded()) {
+					Event nextEvent = new Event(2, i, j, 0);
+					nextPossEvents.add(nextEvent);
+				}
+				if (areaMatricesArray.get(i).binList.get(j).isBinOverflowed()) {
+					Event nextEvent = new Event(3, i, j, 0);
+					nextPossEvents.add(nextEvent);
 				}
 				
 			}
