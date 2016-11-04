@@ -1,4 +1,5 @@
 import java.util.*;
+import java.lang.*;
 
 class Simulator {
 
@@ -6,7 +7,7 @@ class Simulator {
 
 	public static int lorryVolume;
 	public static int lorryMaxLoad;
-	public static float binServiceTime;
+	public static int binServiceTime;
 	public static float binVolume;
 	public static float disposalDistrRate;
 	public static int disposalDistrShape;
@@ -37,7 +38,7 @@ class Simulator {
 			} else if (input.get(i).equals("lorryMaxLoad")) {
 				lorryMaxLoad = Integer.parseInt(input.get(i+1));
 			} else if (input.get(i).equals("binServiceTime")) {
-				binServiceTime = Float.parseFloat(input.get(i+1));
+				binServiceTime = Integer.parseInt(input.get(i+1));
 			} else if (input.get(i).equals("binVolume")) {
 				binVolume = Float.parseFloat(input.get(i+1));
 			} else if (input.get(i).equals("disposalDistrRate")) {
@@ -93,38 +94,32 @@ class Simulator {
 	
 	
 	public void simOutline() {
-		System.out.println("simOutline");
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
-			System.out.println("NUMBER OF EVENTS STORED = " + nextPossEvents.size());
-			System.out.println();
-			//Event nextEvent = chooseNextEvent();
-			currTime ++;
-			if (nextPossEvents.size() == 5) { break; }
+			if (nextPossEvents.size() > 0) {
+				Event nextEvent = chooseNextEvent();
+				triggerNextEvent(nextEvent);
+			} else {
+				this.currTime++;
+			}
 		}
 	}
 
 	
 	
 	public void determineSetOfEvents() {
-		System.out.println("Determining Set of Events");
-		//nextPossEvents.clear();
+		nextPossEvents.clear();
 		for (int i = 0; i < noAreas; i++) {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			for (int j = 1; j <= currNoBins; j++) {
-				if (areaMatricesArray.get(i).binList.get(j).isBagDisposed(currTime)) {
+				if (getBin(i,j).isBagDisposed(currTime)) {
+					
 					Event nextEvent = new Event(1, i, j, 0);
 					nextPossEvents.add(nextEvent);
 					areaMatricesArray.get(i).binList.get(j).updateDisposalInterval(currTime);
 				}
-				if (areaMatricesArray.get(i).binList.get(j).isThresholdExceeded()) {
-					Event nextEvent = new Event(2, i, j, 0);
-					nextPossEvents.add(nextEvent);
-				}
-				if (areaMatricesArray.get(i).binList.get(j).isBinOverflowed()) {
-					Event nextEvent = new Event(3, i, j, 0);
-					nextPossEvents.add(nextEvent);
-				}
+				
+				
 				
 			}
 
@@ -142,6 +137,51 @@ class Simulator {
 			}
 		}
 		return nextPossEvents.get(lowestDelayIndex);
+	}
+
+	public void triggerNextEvent(Event nextEvent) {
+		if (nextEvent.eventType == 1) {
+			int binNum				= nextEvent.binNo;
+			int areaNum				= nextEvent.areaNo;
+			float bagWeight 		= getBin(areaNum, binNum).disposeBag();
+			float binVol 			= (float) Math.round(getBin(areaNum, binNum).currVol * 10) /10;
+			float binWeight			= (float) Math.round(getBin(areaNum, binNum).currWeight * 10) /10;
+			String bagOutput		= timeToString() + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
+			String binOutput 		= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
+			System.out.println(bagOutput);
+			System.out.println(binOutput);
+			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
+					String threshOutput		= timeToString() + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
+					System.out.println(threshOutput);
+					getBin(areaNum, binNum).thresholdReported = true;
+			}
+			if (getBin(areaNum, binNum).isBinOverflowed() && getBin(areaNum, binNum).overflowReported == false) {
+					String overflowOutput		= timeToString() + " -> bin " + areaNum + "." + binNum + " overflowed";
+					System.out.println(overflowOutput);
+					getBin(areaNum, binNum).overflowReported = true;
+			}
+				
+		}
+
+
+	}
+
+	public String timeToString() {
+		int days 		= (int) currTime / 86400;
+		String daysS 	= String.format("%02d", days);
+		int hours		= (int) (currTime % 86400 ) / 3600 ;
+		String hoursS	= String.format("%02d", hours);
+		int minutes 	= (int) ((currTime % 86400 ) % 3600 ) / 60 ;
+		String minutesS	= String.format("%02d", minutes);
+		int seconds		= (int) ((currTime % 86400 ) % 3600 ) % 60 ;
+		String secondsS = String.format("%02d", seconds);
+		String output = daysS + ":" + hoursS + ":" + minutesS + ":" + secondsS;
+		return output;
+	}
+
+	public bin getBin(int areaNo, int binNo) {
+		bin output = areaMatricesArray.get(areaNo).binList.get(binNo);
+		return output;
 	}
 
 }
