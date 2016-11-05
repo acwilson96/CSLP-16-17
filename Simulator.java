@@ -21,6 +21,8 @@ class Simulator {
 	public static ArrayList<String> input;
 
 	public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
+
+	public boolean eventsExist;
 	
 	public Simulator(String args[]) {
 		// Read input file, ArrayList input = list of words in input file.
@@ -29,6 +31,7 @@ class Simulator {
 		input = r.readFile();
 		r.closeFile();
 		this.currTime = 0;
+		eventsExist = true;
 	}
 
 	public void parseInput() {
@@ -98,8 +101,11 @@ class Simulator {
 	public void simOutline() {
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
-			Event nextEvent = chooseNextEvent();
-			triggerNextEvent(nextEvent);
+			// Determine if events exist
+			if (eventsExist) {
+				Event nextEvent = chooseNextEvent();
+				triggerNextEvent(nextEvent);
+			} else { break; }	
 		}
 	}
 
@@ -113,17 +119,22 @@ class Simulator {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			// Loop through all the bins in said area.
 			for (int j = 1; j <= currNoBins; j++) {
-				// Store the time until each bin in that area has a bag disposed.
-				int delay = getBin(i,j).timeUntilNextDisposal(currTime);
-				Event nextEvent = new Event(1, i, j, delay);
-				nextPossEvents.add(nextEvent);
+				// Check to see if current bin can have valid disposal(i.e. bin has not overflowed)
+				if (!getBin(i,j).isBinOverflowed()) {
+					// Store the time until each bin in that area has a bag disposed.
+					int delay = getBin(i,j).timeUntilNextDisposal(currTime);
+					Event nextEvent = new Event(1, i, j, delay);
+					nextPossEvents.add(nextEvent);
+				}
 			}
 
 		}
-
+		if (nextPossEvents.size() == 0) { eventsExist = false; }
 	}
 
 	public Event chooseNextEvent() {
+		for (int i = 0; i < nextPossEvents.size(); i++) {
+		}
 		// Initialise the output Event to be the first in the list of saved events.
 		int lowestDelay		 =	nextPossEvents.get(0).getDelay();
 		int lowestDelayIndex =	0;
@@ -162,7 +173,7 @@ class Simulator {
 					getBin(areaNum, binNum).thresholdReported = true;
 					System.out.println(threshOutput);
 			}
-			if (getBin(areaNum, binNum).isBinOverflowed() && getBin(areaNum, binNum).overflowReported == false) {
+			if (getBin(areaNum, binNum).isBinOverflowed()) {
 					String overflowOutput		= timeToString() + " -> bin " + areaNum + "." + binNum + " overflowed";
 					getBin(areaNum, binNum).overflowReported = true;
 					System.out.println(overflowOutput);

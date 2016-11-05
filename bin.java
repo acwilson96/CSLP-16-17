@@ -55,9 +55,11 @@ class bin {
 
 	public void updateDisposalInterval(int time) { // Generates the time of next bag disposal for this bin
 		this.currTime			=	time;
-		double numBagsPerHour	=	-1 * this.erlangMean * Math.log(rand());
-		double nextBag 			=	3600 / numBagsPerHour;
-		this.timeOfNextBag		=	(int) nextBag + currTime;
+		double numHourToNext	=	-1 * this.erlangMean * Math.log(rand());
+		double numSecToNext		=	3600 * numHourToNext;
+		this.timeOfNextBag		=	(int) numSecToNext + currTime;
+		
+
 	}
 
 	public boolean isThresholdExceeded() { // Returns whether the threshold has been exceeded
