@@ -91,12 +91,26 @@ class Simulator {
 				stopTime	= stopTime * 60 * 60;
 			} else if (input.get(i).equals("warmUpTime")) {
 				warmUpTime 	= Float.parseFloat(input.get(i+1));
+				warmUpTime	= warmUpTime  * 60 * 60;
 			}
 		}
 		
 	}
 
-	
+	public boolean checkInput() {
+		boolean output = true;
+		// Check lorry capacity > bin capacity
+		if (this.lorryVolume < this.binVolume) {
+			output = false;
+			System.out.println("Error: lorryVolume cannot be less than binVolume");
+		}
+		// Check that warm-up time <= simulation time
+		if (this.warmUpTime > this.stopTime){
+			output = false;
+			System.out.println("Error: warmUpTime cannot be more than stopTime");
+		}
+		return output;
+	}
 	
 	public void simOutline() {
 		while (this.currTime < this.stopTime) {
