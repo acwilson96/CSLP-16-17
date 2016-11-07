@@ -3,8 +3,8 @@ import java.lang.*;
 
 class Simulator {
 
-	
-	 
+
+
 	// Variables that should be defined in input file
 	 public static int lorryVolume;
 	 public static int lorryMaxLoad;
@@ -19,7 +19,7 @@ class Simulator {
 	 public static ArrayList<areaMapMatrix> areaMatricesArray = new ArrayList<areaMapMatrix>();
 	 public static float stopTime;
 	 public static float warmUpTime;
-	
+
 	// Valid variable declarations
 	 private boolean lorryVolumeValid;
 	 private boolean lorryMaxLoadValid;
@@ -53,7 +53,7 @@ class Simulator {
 	 public static int currTime;
 	 public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	 public boolean eventsExist;
-	
+
 	public static ArrayList<String> input;
 
 
@@ -80,7 +80,7 @@ class Simulator {
 					lorryVolume = Integer.parseInt(input.get(i+1));
 					lorryVolumeOccur++;
 					lorryVolumeValid = true;
-				} 
+				}
 				catch (NumberFormatException e) {
 					System.err.println("Error: " + input.get(i+1) + " is not a valid type for lorryVolume.		lorryVolume is of type Integer");
 					lorryVolumeValid = false;
@@ -124,7 +124,7 @@ class Simulator {
 				catch (NumberFormatException e) {
 					System.err.println("Error: " + input.get(i+1) + " is not a valid type for disposalDistrRate.		disposalDistrRate is of type Float");
 					disposalDistrRateValid = false;
-				}				
+				}
 			} else if (input.get(i).equals("disposalDistrShape")) {
 				try {
 					disposalDistrShape = Integer.parseInt(input.get(i+1));
@@ -210,7 +210,7 @@ class Simulator {
 			  	 }
 			  	 catch (NumberFormatException e) {
 			  		System.err.println("Error: " + input.get(i+1) + " is not a valid type for areaIdx. areaIdx is of type Integer");
-			  	 
+
 			  	 }
 			  	// serviceFreq  ||
 			  	 try {
@@ -228,14 +228,14 @@ class Simulator {
 			  	 catch (NumberFormatException e) {
 			  		System.err.println("Error: " + input.get(i+5) + " is not a valid type for thresholdVal. thresholdVal is of type Float");
 			  	 }
-			  	// noBins       || 
+			  	// noBins       ||
 			  	 try {
 			  		noBins			= Integer.parseInt(input.get(i+7));
 			  		validCount++;
 			  	 }
 			  	 catch (NumberFormatException e) {
 			  		System.err.println("Error: " + input.get(i+7) + " is not a valid type for noBins. noBins is of type Integer");
-			  	 } 
+			  	 }
 			  	 System.err.println();
 			  	if (validCount == 4){
 			  		int[][] roadMatrix 	= new int[noBins+1][noBins+1];
@@ -257,6 +257,7 @@ class Simulator {
 			  						// Store distance
 			  						 try {
 			  							roadMatrix[j][k] = Integer.parseInt(input.get(i+j+k));
+											this.areaMapsValid = true;
 			  						 }
 			  						 catch (NumberFormatException e) {
 			  							System.err.println("Error: areaIdx " + areaIdx + "'s roadsLayout could not be parsed. Either an element is not of type Integer, or mismatch in noBins and size of roadsLayout matrix");
@@ -273,7 +274,7 @@ class Simulator {
 			  	} else {
 			  		System.err.println("Error: Area Map could not be created to due one or more of the errors above");
 			  	}
-			} 
+			}
 		}
 	}
 
@@ -291,7 +292,7 @@ class Simulator {
 		 noAreasValid 				= false;
 		 stopTimeValid 				= false;
 		 warmUpTimeValid 			= false;
-		 areaMapsValid 				= false;
+		 areaMapsValid 				= true;
 		// Variable occurences
 		 lorryVolumeOccur		= 0;
 		 lorryMaxLoadOccur		= 0;
@@ -325,7 +326,7 @@ class Simulator {
 		 }
 		 if (!binVolumeValid) {
 			System.err.println("Error: Invalid input file provided. Parameter 'binVolume'		missing. The simulation will terminate.");
-			output = false;			
+			output = false;
 		 }
 		 if (!disposalDistrRateValid) {
 			System.err.println("Error: Invalid input file provided. Parameter 'disposalDistrRate'	missing. The simulation will terminate.");
@@ -372,7 +373,7 @@ class Simulator {
 		 }
 		return output;
 	}
-	
+
 
 	public void inputWarnings() {
 		// Warn if more than one instance of a variable exists
@@ -427,10 +428,10 @@ class Simulator {
 			if (eventsExist) {
 				Event nextEvent = chooseNextEvent();
 				triggerNextEvent(nextEvent);
-			} else { break; }	
+			} else { break; }
 		}
 	}
-	
+
 	public void determineSetOfEvents() {
 		// Clear possible events so that old events don't interfere and create infinite loop of same event being triggered.
 		nextPossEvents.clear();
