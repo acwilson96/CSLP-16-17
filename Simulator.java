@@ -75,115 +75,127 @@ class Simulator {
 		for (int i = 0; i < input.size(); i++) {
 			// If the word = a keyword such as a variable, store the next value
 			// Standard Variables ||
-			 if (input.get(i).equals("lorryVolume")) {
+			if (input.get(i).equals("lorryVolume")) {
 				try {
 					lorryVolume = Integer.parseInt(input.get(i+1));
 					lorryVolumeOccur++;
+					lorryVolumeValid = true;
 				} 
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for lorryVolume. lorryVolume is of type Integer");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for lorryVolume.		lorryVolume is of type Integer");
 					lorryVolumeValid = false;
 				}
-			 } else if (input.get(i).equals("lorryMaxLoad")) {
+			} else if (input.get(i).equals("lorryMaxLoad")) {
 				try {
 					lorryMaxLoad = Integer.parseInt(input.get(i+1));
 					lorryMaxLoadOccur++;
+					lorryMaxLoadValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for lorryMaxLoad. lorryMaxLoad is of type Integer");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for lorryMaxLoad.		lorryMaxLoad is of type Integer");
 					lorryMaxLoadValid = false;
 				}
-			 } else if (input.get(i).equals("binServiceTime")) {
+			} else if (input.get(i).equals("binServiceTime")) {
 				try {
 					binServiceTime = Integer.parseInt(input.get(i+1));
 					binServiceTimeOccur++;
+					binServiceTimeValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for binServiceTime. binServiceTime is of type Integer");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for binServiceTime.		binServiceTime is of type Integer");
 					binServiceTimeValid = false;
 				}
-			 } else if (input.get(i).equals("binVolume")) {
+			} else if (input.get(i).equals("binVolume")) {
 				try {
 					binVolume = Float.parseFloat(input.get(i+1));
 					binVolumeOccur++;
+					binVolumeValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for binVolume. binVolume is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for binVolume.		binVolume is of type Float");
 					binVolumeValid = false;
 				}
-			 } else if (input.get(i).equals("disposalDistrRate")) {
+			} else if (input.get(i).equals("disposalDistrRate")) {
 				try {
 					disposalDistrRate = Float.parseFloat(input.get(i+1));
 					disposalDistrRateOccur++;
+					disposalDistrRateValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for disposalDistrRate. disposalDistrRate is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for disposalDistrRate.		disposalDistrRate is of type Float");
 					disposalDistrRateValid = false;
 				}				
-			 } else if (input.get(i).equals("disposalDistrShape")) {
+			} else if (input.get(i).equals("disposalDistrShape")) {
 				try {
 					disposalDistrShape = Integer.parseInt(input.get(i+1));
 					disposalDistrShapeOccur++;
+					disposalDistrShapeValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for disposalDistrShape. disposalDistrShape is of type Integer");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for disposalDistrShape.		disposalDistrShape is of type Integer");
 					disposalDistrShapeValid = false;
 				}
-			 } else if (input.get(i).equals("bagVolume")) {
+			} else if (input.get(i).equals("bagVolume")) {
 				try {
 					bagVolume = Float.parseFloat(input.get(i+1));
 					bagVolumeOccur++;
+					bagVolumeValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for bagVolume. bagVolume is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for bagVolume.			bagVolume is of type Float");
 					bagVolumeValid = false;
 				}
-			 } else if (input.get(i).equals("bagWeightMin")) {
+			} else if (input.get(i).equals("bagWeightMin")) {
 				try {
 					bagWeightMin = Float.parseFloat(input.get(i+1));
 					bagWeightMinOccur++;
+					bagWeightMinValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for bagWeightMin. bagWeightMin is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for bagWeightMin.		bagWeightMin is of type Float");
 					bagWeightMinValid = false;
 				}
-			 } else if (input.get(i).equals("bagWeightMax")) {
+			} else if (input.get(i).equals("bagWeightMax")) {
 				try {
 					bagWeightMax = Float.parseFloat(input.get(i+1));
 					bagWeightMaxOccur++;
+					bagWeightMaxValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for bagWeightMax. bagWeightMax is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for bagWeightMax.		bagWeightMax is of type Float");
 					bagWeightMaxValid = false;
 				}
-			 } else if (input.get(i).equals("noAreas")) {
+			} else if (input.get(i).equals("noAreas")) {
 				try {
 					noAreas = Integer.parseInt(input.get(i+1));
 					noAreasOccur++;
+					noAreasValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for noAreas. noAreas is of type Integer");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for noAreas.			noAreas is of type Integer");
 					noAreasValid = false;
 				}
-			 } else if (input.get(i).equals("stopTime")) {
+			} else if (input.get(i).equals("stopTime")) {
 			  	try {
 			  		stopTime 	= Float.parseFloat(input.get(i+1)) * 60 * 60;
 					stopTimeOccur++;
+					stopTimeValid = true;
 			  	}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for stopTime. stopTime is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for stopTime.			stopTime is of type Float");
 					stopTimeValid = false;
 				}
-			 } else if (input.get(i).equals("warmUpTime")) {
+			} else if (input.get(i).equals("warmUpTime")) {
 				try {
 					warmUpTime 	= Float.parseFloat(input.get(i+1))  * 60 * 60;
+					warmUpTimeOccur++;
+					warmUpTimeValid = true;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: " + input.get(i+1) + " is not a valid type for warmUpTime. warmUpTime is of type Float");
+					System.err.println("Error: " + input.get(i+1) + " is not a valid type for warmUpTime.		warmUpTime is of type Float");
 					warmUpTimeValid = false;
-					warmUpTimeOccur++;
 				}
-			 }
+			}
 			// Store Area Maps    ||
 			 else if (input.get(i).equals("areaIdx")) {
 				int areaIdx			= 0;
@@ -224,25 +236,33 @@ class Simulator {
 			  	 catch (NumberFormatException e) {
 			  		System.err.println("Error: " + input.get(i+7) + " is not a valid type for noBins. noBins is of type Integer");
 			  	 } 
+			  	 System.err.println();
 			  	if (validCount == 4){
 			  		int[][] roadMatrix 	= new int[noBins+1][noBins+1];
 			  		// Move down input until you reach next roadsLayout
 			  		while (!input.get(i).equals("roadsLayout")) {
 			  			i++;
 			  		}
+
 			  		// Populate roadMatrix \\
 			  		if (input.get(i).equals("roadsLayout")) {
 			  			i++;
 			  			for (int j=0; j < (noBins+1); j++) {
 			  				for (int k=0; k < (noBins+1); k++) {
-			  					// Store distance
-			  					 try {
-			  						roadMatrix[j][k] = Integer.parseInt(input.get(i+j+k));
-			  					 }
-			  					 catch (NumberFormatException e) {
-			  						System.err.println("The road matrix contains a value that is not of type Integer at row " + j +" and column " + k);
-			  						this.areaMapsValid = false;
-			  					 }
+			  					int ijk = i + j + k;
+			  					if (i+j+k >= input.size()) {
+			  						System.err.println("Error: Possible mismatch in noBins and size of areaIdx " + areaIdx + "'s roadsLayout matrix");
+			  						break;
+			  					} else {
+			  						// Store distance
+			  						 try {
+			  							roadMatrix[j][k] = Integer.parseInt(input.get(i+j+k));
+			  						 }
+			  						 catch (NumberFormatException e) {
+			  							System.err.println("Error: areaIdx " + areaIdx + "'s roadsLayout could not be parsed. Either an element is not of type Integer, or mismatch in noBins and size of roadsLayout matrix");
+			  							this.areaMapsValid = false;
+			  						 }
+			  					}
 			  				}
 			  				i = i + noBins;
 			  			}
@@ -259,19 +279,19 @@ class Simulator {
 
 	public void initValidVars() {
 		// Variables have stored a value
-		 lorryVolumeValid 			= true;
-		 lorryMaxLoadValid	 		= true;
-		 binServiceTimeValid 		= true;
-		 binVolumeValid 			= true;
-		 disposalDistrRateValid 	= true;
-		 disposalDistrShapeValid	= true;
-		 bagVolumeValid 			= true;
-		 bagWeightMinValid 			= true;
-		 bagWeightMaxValid 			= true;
-		 noAreasValid 				= true;
-		 stopTimeValid 				= true;
-		 warmUpTimeValid 			= true;
-		 areaMapsValid 				= true;
+		 lorryVolumeValid 			= false;
+		 lorryMaxLoadValid	 		= false;
+		 binServiceTimeValid 		= false;
+		 binVolumeValid 			= false;
+		 disposalDistrRateValid 	= false;
+		 disposalDistrShapeValid	= false;
+		 bagVolumeValid 			= false;
+		 bagWeightMinValid 			= false;
+		 bagWeightMaxValid 			= false;
+		 noAreasValid 				= false;
+		 stopTimeValid 				= false;
+		 warmUpTimeValid 			= false;
+		 areaMapsValid 				= false;
 		// Variable occurences
 		 lorryVolumeOccur		= 0;
 		 lorryMaxLoadOccur		= 0;
@@ -289,59 +309,62 @@ class Simulator {
 
 	public boolean checkInput() {
 		boolean output = true;
+		System.err.println();
 		// Check every required variable has a value
 		 if (!lorryVolumeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'lorryVolume' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'lorryVolume'		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!lorryMaxLoadValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'lorryMaxLoad' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'lorryMaxLoad'		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!binServiceTimeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'binServiceTime' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'binServiceTime'		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!binVolumeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'binVolue' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'binVolume'		missing. The simulation will terminate.");
 			output = false;			
 		 }
 		 if (!disposalDistrRateValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'disposalDistrRate' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'disposalDistrRate'	missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!disposalDistrShapeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'disposalDistrShape' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'disposalDistrShape'	missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!bagVolumeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'bagVolume' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'bagVolume' 		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!bagWeightMinValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'bagWeightMin' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'bagWeightMin' 		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!bagWeightMaxValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'bagWeightMax' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'bagWeightMax' 		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!noAreasValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'noAreas' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'noAreas' 		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!stopTimeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'stopTime' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'stopTime'		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!warmUpTimeValid) {
-			System.err.println("Error: Invalid input file provided. Parameter 'warmUpTime' missing. The simulation will terminate.");
+			System.err.println("Error: Invalid input file provided. Parameter 'warmUpTime' 		missing. The simulation will terminate.");
 			output = false;
 		 }
 		 if (!areaMapsValid) {
+		 	System.err.println();
 			System.err.println("Error: Invalid input file provided. Please check the area maps are valid");
 			output = false;
 		 }
+		System.err.println();
 		// Check for valid values
 		 if (bagWeightMax < bagWeightMin) {
 		 	System.err.println("Error: bagWeightMax cannot be less than bagWeightMin");
