@@ -19,6 +19,7 @@ class Simulator {
 	 public static ArrayList<areaMapMatrix> areaMatricesArray = new ArrayList<areaMapMatrix>();
 	 public static float stopTime;
 	 public static float warmUpTime;
+	 public static float globaLserviceFreq;
 
 	// Valid variable declarations
 	 private boolean lorryVolumeValid;
@@ -34,6 +35,7 @@ class Simulator {
 	 private boolean stopTimeValid;
 	 private boolean warmUpTimeValid;
 	 private boolean areaMapsValid;
+	 private boolean globaLserviceFreqFOUND;
 
 	// Variable occurences declarations
  	 private int lorryVolumeOccur;
@@ -117,6 +119,9 @@ class Simulator {
 				}
 			} else if (input.get(i).equals("disposalDistrRate")) {
 				try {
+					if (input.get(i+1).equals("experiment")) {
+						i++;
+					}
 					disposalDistrRate = Float.parseFloat(input.get(i+1));
 					disposalDistrRateOccur++;
 					disposalDistrRateValid = true;
@@ -127,6 +132,9 @@ class Simulator {
 				}
 			} else if (input.get(i).equals("disposalDistrShape")) {
 				try {
+					if (input.get(i+1).equals("experiment")) {
+						i++;
+					}
 					disposalDistrShape = Integer.parseInt(input.get(i+1));
 					disposalDistrShapeOccur++;
 					disposalDistrShapeValid = true;
@@ -135,7 +143,16 @@ class Simulator {
 					System.err.println("Error: " + input.get(i+1) + " is not a valid type for disposalDistrShape.		disposalDistrShape is of type Integer");
 					disposalDistrShapeValid = false;
 				}
-			} else if (input.get(i).equals("bagVolume")) {
+			} else if (input.get(i).equals("serviceFreq") && input.get(i+1).equals("experiment")) {
+				i++;
+				try {
+					globaLserviceFreq = Float.parseFloat(input.get(i+1));
+					globaLserviceFreqFOUND = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: serviceFreq found for experiment purposes, but " + input.get(i+1) + " is not of type Float");
+				}
+			}else if (input.get(i).equals("bagVolume")) {
 				try {
 					bagVolume = Float.parseFloat(input.get(i+1));
 					bagVolumeOccur++;
@@ -269,17 +286,24 @@ class Simulator {
 			  			}
 			  		}
 			  		// Save area map to array \\
-			  		areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
-			  		areaMatricesArray.add(currentAreaMatrix);
+			  		if (globaLserviceFreqFOUND) {
+			  			areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, globaLserviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+			  			areaMatricesArray.add(currentAreaMatrix);
+			  		} else {
+			  			areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+			  			areaMatricesArray.add(currentAreaMatrix);
+			  		}
 			  	} else {
 			  		System.err.println("Error: Area Map could not be created to due one or more of the errors above");
 			  	}
 			}
 		}
+		inputWarnings();
 	}
 
 	public void initValidVars() {
 		// Variables have stored a value
+		 globaLserviceFreqFOUND		= false;
 		 lorryVolumeValid 			= false;
 		 lorryMaxLoadValid	 		= false;
 		 binServiceTimeValid 		= false;
@@ -296,6 +320,7 @@ class Simulator {
 		// Variable occurences
 		 lorryVolumeOccur		= 0;
 		 lorryMaxLoadOccur		= 0;
+		 binVolumeOccur			= 0;
 		 binServiceTimeOccur	= 0;
 		 binVolumeOccur			= 0;
 		 disposalDistrRateOccur	= 0;
@@ -367,10 +392,49 @@ class Simulator {
 		 }
 		System.err.println();
 		// Check for valid values
+		// No negatives or 0's
+		 if (lorryVolume <= 0) {
+		 	System.err.println("Error: lorryVolume cannot be 0 m^3 or negative");
+		 	output = false;
+		 }
+		 if (lorryMaxLoad <= 0) {
+		 	System.err.println("Error: lorryMaxLoad cannot be 0 kg or negative");
+		 	output = false;
+		 }
+		 if (binServiceTime <= 0) {
+		 	System.err.println("Error: binServiceTime cannot be 0 seconds or negative");
+		 	output = false;
+		 }
+		 if (disposalDistrRate <= 0) {
+		 	System.err.println("Error: disposalDistrRate cannot be 0 or less");
+		 	output = false;
+		 }
+		 if (disposalDistrShape <= 0) {
+		 	System.err.println("Error: disposalDistrShape cannot be 0 negative");
+		 	output = false;
+		 }
+		 if (bagVolume <= 0) {
+		 	System.err.println("Error: bagVolume cannot be 0 m^3 or negative");
+		 	output = false;
+		 }
+		 if (bagWeightMin <= 0) {
+		 	System.err.println("Error: bagWeightMin cannot be 0 kg or negative");
+		 	output = false;
+		 }
+		 if (bagWeightMax <= 0) {
+		 	System.err.println("Error: bagWeightMax cannot be 0 kg or negative");
+		 	output = false;
+		 }
+		 if (noAreas <= 0) {
+		 	System.err.println("Error: noAreas cannot be 0 or negative");
+		 	output = false;
+		 }
+		// Logical errors
 		 if (bagWeightMax < bagWeightMin) {
 		 	System.err.println("Error: bagWeightMax cannot be less than bagWeightMin");
 		 	output = false;
 		 }
+		 
 		return output;
 	}
 
@@ -385,6 +449,9 @@ class Simulator {
 		 }
 		 if (binServiceTimeOccur > 1) {
 			System.out.println("Warning: more than one instance of binServiceTime was detected. The one used will be the one that appears latest in the input.");
+		 }
+		 if (binVolumeOccur > 1) {
+		 	System.out.println("Warning: more than one instance of binVolume was detected. The one used will be the one that appears latest in the input.");
 		 }
 		 if (disposalDistrRateOccur > 1) {
 			System.out.println("Warning: more than one instance of disposalDistrRate was detected. The one used will be the one that appears latest in the input.");
@@ -407,20 +474,26 @@ class Simulator {
 		 if (stopTimeOccur > 1) {
 			System.out.println("Warning: more than one instance of stopTime was detected. The one used will be the one that appears latest in the input.");
 		 }
-		 if (warmUpTime > 1) {
+		 if (warmUpTimeOccur > 1) {
 			System.out.println("Warning: more than one instance of warmUpTime was detected. The one used will be the one that appears latest in the input.");
 		 }
-		// Check lorry capacity > bin capacity
-		 if (this.lorryVolume < this.binVolume) {
-			System.out.println("Warning: lorryVolume is less than binVolume");
+		// Service rate > disposal rate
+		 for (int i= 0; i < noAreas; i++) {
+		 	if (1/areaMatricesArray.get(i).serviceFreq > disposalDistrRate) {
+		 		System.out.println("Warning: service frequency of area " + i + " is greater than the disposal rate");
+		 	}
 		 }
+		if (this.lorryVolume < this.binVolume) {
+			System.out.println("Warning: lorryVolume is less than binVolume");
+		}
 		// Check that warm-up time <= simulation time
 		 if (this.warmUpTime > this.stopTime){
 			System.out.println("Warning: warmUpTime is more than stopTime");
 		 }
+		 System.out.println();
 	}
 
-
+	// Start of simulation
 	public void simOutline() {
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
