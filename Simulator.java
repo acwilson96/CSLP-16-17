@@ -479,7 +479,7 @@ class Simulator {
 		 }
 		// Service rate > disposal rate
 		 for (int i= 0; i < noAreas; i++) {
-		 	if (1/areaMatricesArray.get(i).serviceFreq > disposalDistrRate) {
+		 	if (areaMatricesArray.get(i).serviceFreq > disposalDistrRate) {
 		 		System.out.println("Warning: service frequency of area " + i + " is greater than the disposal rate");
 		 	}
 		 }
