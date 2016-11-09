@@ -410,7 +410,7 @@ class Simulator {
 		 	output = false;
 		 }
 		 if (disposalDistrShape <= 0) {
-		 	System.err.println("Error: disposalDistrShape cannot be 0 negative");
+		 	System.err.println("Error: disposalDistrShape cannot be 0 or negative");
 		 	output = false;
 		 }
 		 if (bagVolume <= 0) {
