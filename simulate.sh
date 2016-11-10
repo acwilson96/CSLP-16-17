@@ -22,8 +22,6 @@ if [ "$2" == "file" ]
 fi
 if [[ "$runProg" == 1 ]]
 	then
-		echo "Starting simulation"
-		echo ""
 		java simStart $input
 fi
 if [[ "$runProg" == 2 ]]

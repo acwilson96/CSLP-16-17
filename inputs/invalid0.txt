@@ -1,3 +1,5 @@
+#Everything in this is invalid type
+
 lorryVolume 20.5
 binServiceTime 100s
 binVol .2.5.

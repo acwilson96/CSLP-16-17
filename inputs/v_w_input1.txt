@@ -1,4 +1,5 @@
 # Will warn all variables exist multiple times
+
 # Total waste volume a lorry can accommodate (cubic metres)
 lorryVolume 20
 lorryVolume 20
