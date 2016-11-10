@@ -56,7 +56,6 @@ class Simulator {
 	 public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	 public boolean eventsExist;
 
-	//public static ArrayList<String> input;
 	public static ArrayList<String> input;
 	private ArrayList<String> validTokens = new ArrayList<String>();
 
@@ -410,7 +409,7 @@ class Simulator {
 		 }
 		 if (!areaMapsValid) {
 		 	System.err.println();
-			System.err.println("Error: Invalid input file provided. Please check the area maps are valid");
+			System.err.println("Error: Invalid input file provided. Please check the area maps are valid.");
 			output = false;
 		 }
 		// Check for valid values
@@ -460,10 +459,23 @@ class Simulator {
 		 for (int i = 0; i < input.size(); i++) {
 		 	String nextToken = getWord(input.get(i), 0);
 		 	if (!validTokens.contains(nextToken) && !isNumerical(nextToken)){
-		 		System.out.println("Error: Unknown token found on line " + i + ": " + nextToken + ". Simulation will terminate.");
+		 		System.err.println("Error: Unknown token found: " + nextToken + ". Simulation will terminate.");
 		 		output = false;
 		 	}
 		 }
+		// Check area maps have no 0 entries outside of diagonal
+		 for (int i = 0; i < areaMatricesArray.size(); i++) {
+		 	int arrayLength = areaMatricesArray.get(i).noBins + 1;
+		 	for (int j = 0; j < arrayLength; j++) {
+		 		for (int k = 0; k < arrayLength; k++) {
+		 			if (j!=k && areaMatricesArray.get(i).roadsLayout[j][k] == 0) {
+		 				System.err.println("Error: Area " + i + " has a weight of 0 in the roadLayout matrix that is not on the diagnoal at: [" + j + "," + k +"].");
+		 				output = false;
+		 			}
+		 		}
+		 	}
+		 }
+
 		return output;
 	}
 
@@ -517,8 +529,23 @@ class Simulator {
 		if (this.warmUpTime > this.stopTime){
 			System.out.println("Warning: warmUpTime is more than stopTime");
 		}
+		// Check for multiple arguments on a line
+		 for (int i = 0; i < input.size(); i++) {
+		 	String nextLine = input.get(i);
+		 	String[] currLine = getWords(nextLine);
+		 	if (currLine.length > 2) {
+				for (int x = 2; x < currLine.length; x++) {
+		 			if (!isNumerical(currLine[0])) {
+		 				if (!currLine[0].equals("areaIdx")) {
+		 					if (!currLine[1].equals("experiment")) {
+		 						System.err.println("Warning: Unknown token found in same line as variable " + currLine[0] + " : " + currLine[x]);
+		 					}
+		 				}
+		 			}
+		 		}
+			}
+		 }
 		System.out.println();
-		
 	}
 
 
@@ -625,8 +652,8 @@ class Simulator {
 		return output;
 	}
 
-	public String getWord(String sentence, int x) {
-		String[] words = sentence.split("\\$|\\s+");
+	public String getWord(String text, int x) {
+		String[] words = text.split("\\$|\\s+");
 		int size = 0;
 		for (int i = 0; i <words.length; i++) {
 			if (!words[i].equals("")) {
@@ -642,6 +669,25 @@ class Simulator {
 			}
 		}
 		return output[x];
+	}
+
+	public String[] getWords(String text) {
+		String[] words = text.split("\\$|\\s+");
+		int size = 0;
+		for (int i = 0; i <words.length; i++) {
+			if (!words[i].equals("")) {
+				size++;
+			}
+		}
+		String[] output = new String[size];
+		int count = 0;
+		for (int i = 0; i <words.length; i++) {
+			if (!words[i].equals("")) {
+				output[count] = words[i];
+				count++;
+			}
+		}
+		return output;
 	}
 
 	public boolean isNumerical(String text) {
