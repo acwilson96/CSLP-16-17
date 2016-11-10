@@ -462,7 +462,7 @@ class Simulator {
 		 for (int i = 0; i < input.size(); i++) {
 		 	String nextToken = getWord(input.get(i), 0);
 		 	if (!validTokens.contains(nextToken) && !isNumerical(nextToken)){
-		 		System.err.println("Error: Unknown token found: " + nextToken + ". Simulation will terminate.");
+		 		System.err.println("Error: Unknown token found: " + nextToken + ". Simulation will terminate." + input.get(i));
 		 		output = false;
 		 	}
 		 }
@@ -479,6 +479,26 @@ class Simulator {
 		 			}
 		 		}
 		 	}
+		 }
+		// Check areaIdx run in correct order & correct number
+		 int[] areaIdxOrder = new int[this.noAreas];
+		 int count = 0;
+		 int numberAreaIdx = 0;
+		 for (int i = 0; i < input.size(); i++) {
+		 	if (getWord(input.get(i), 0).equals("areaIdx")) {
+		 		numberAreaIdx++;
+		 		try {
+		 			areaIdxOrder[count] = Integer.parseInt(getWord(input.get(i), 1));
+		 			count++;
+		 		}
+		 		catch (Exception e) {
+		 			output = false;
+		 		}
+		 	}
+		 }
+		 if (numberAreaIdx != noAreas) {
+		 	System.err.println("Error: Number of areaIdx does not match noAreas : Number of areaIdx = " + numberAreaIdx + ". noAreas = " + noAreas);
+		 	output = false;
 		 }
 		return output;
 	}

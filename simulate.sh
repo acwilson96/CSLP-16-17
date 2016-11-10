@@ -48,6 +48,14 @@ if [[ "$runProg" == 2 ]]
 		java simStart inputs/inv_exp_input4.txt > outputs/inv_exp_input4_OUT.txt
 		echo ""
 		echo ""
+		echo "------------inv_grid_mismatch_input------------"
+		java simStart inputs/inv_grid_mismatch_input.txt > outputs/inv_grid_mismatch_input_OUT.txt
+		echo ""
+		echo ""
+		echo "------------inv_grid_mismatch_input2------------"
+		java simStart inputs/inv_grid_mismatch_input2.txt > outputs/inv_grid_mismatch_input2_OUT.txt
+		echo ""
+		echo ""
 		echo "------------inv_grid_zero_input------------"
 		java simStart inputs/inv_grid_zero_input.txt > outputs/inv_grid_zero_input_OUT.txt
 		echo ""
