@@ -56,21 +56,27 @@ class Simulator {
 	 public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	 public boolean eventsExist;
 
+	//public static ArrayList<String> input2;
 	public static ArrayList<String> input;
 
 
 
 	public Simulator(String args[]) {
 		// Read input file, ArrayList input = list of words in input file.
-		readfile r = new readfile();
-		r.openFile(args[0]);
-		input = r.readFile();
-		r.closeFile();
+		//readfile r = new readfile();
+		//r.openFile(args[0]);
+		//input = r.readFile();
+		//r.closeFile();
 		this.currTime = 0;
 		eventsExist = true;
+
+		// TEST
+		readfile s = new readfile();
+		input = s.readFile2(args[0]);
+		//
 	}
 
-	// Input parsing and validation
+	/* Input parsing and validation
 	public void parseInput() {
 		initValidVars();
 		// Loop through every word in the input file.
@@ -299,6 +305,256 @@ class Simulator {
 			}
 		}
 		inputWarnings();
+	}
+	*/
+
+	
+	public void parseInput2() {
+		initValidVars();
+		// Loop through every word in the input file.
+		for (int i = 0; i < input.size(); i++) {			
+			// If the word = a keyword such as a variable, store the next value
+			// Standard Variables ||
+			if (getWord(input.get(i), 0).equals("lorryVolume")) {
+				try {
+					lorryVolume = Integer.parseInt(getWord(input.get(i), 1));
+					lorryVolumeOccur++;
+					lorryVolumeValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for lorryVolume.		lorryVolume is of type Integer");
+					lorryVolumeValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("lorryMaxLoad")) {
+				try {
+					lorryMaxLoad = Integer.parseInt(getWord(input.get(i), 1));
+					lorryMaxLoadOccur++;
+					lorryMaxLoadValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for lorryMaxLoad.		lorryMaxLoad is of type Integer");
+					lorryMaxLoadValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("binServiceTime")) {
+				try {
+					binServiceTime = Integer.parseInt(getWord(input.get(i), 1));
+					binServiceTimeOccur++;
+					binServiceTimeValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for binServiceTime.		binServiceTime is of type Integer");
+					binServiceTimeValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("binVolume")) {
+				try {
+					binVolume = Float.parseFloat(getWord(input.get(i), 1));
+					binVolumeOccur++;
+					binVolumeValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for binVolume.		binVolume is of type Float");
+					binVolumeValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("disposalDistrRate")) {
+				try {
+					if (getWord(input.get(i), 1).equals("experiment")) {
+						disposalDistrRate = Float.parseFloat(getWord(input.get(i), 2));
+						disposalDistrRateOccur++;
+						disposalDistrRateValid = true;
+					} else {
+						disposalDistrRate = Float.parseFloat(getWord(input.get(i), 1));
+						disposalDistrRateOccur++;
+						disposalDistrRateValid = true;
+					}
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for disposalDistrRate.		disposalDistrRate is of type Float");
+					disposalDistrRateValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("disposalDistrShape")) {
+				try {
+					if (getWord(input.get(i), 1).equals("experiment")) {
+						disposalDistrShape = Integer.parseInt(getWord(input.get(i), 2));
+						disposalDistrShapeOccur++;
+						disposalDistrShapeValid = true;
+					} else {
+						disposalDistrShape = Integer.parseInt(getWord(input.get(i), 1));
+						disposalDistrShapeOccur++;
+						disposalDistrShapeValid = true;
+					}
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for disposalDistrShape.		disposalDistrShape is of type Integer");
+					disposalDistrShapeValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("serviceFreq") && getWord(input.get(i), 1).equals("experiment")) {
+				try {
+					globaLserviceFreq = Float.parseFloat(getWord(input.get(i), 2));
+					globaLserviceFreqFOUND = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: serviceFreq found for experiment purposes, but " + getWord(input.get(i), 2) + " is not of type Float");
+				}
+			} else if (getWord(input.get(i), 0).equals("bagVolume")) {
+				try {
+					bagVolume = Float.parseFloat(getWord(input.get(i), 1));
+					bagVolumeOccur++;
+					bagVolumeValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for bagVolume.			bagVolume is of type Float");
+					bagVolumeValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("bagWeightMin")) {
+				try {
+					bagWeightMin = Float.parseFloat(getWord(input.get(i), 1));
+					bagWeightMinOccur++;
+					bagWeightMinValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for bagWeightMin.		bagWeightMin is of type Float");
+					bagWeightMinValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("bagWeightMax")) {
+				try {
+					bagWeightMax = Float.parseFloat(getWord(input.get(i), 1));
+					bagWeightMaxOccur++;
+					bagWeightMaxValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for bagWeightMax.		bagWeightMax is of type Float");
+					bagWeightMaxValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("noAreas")) {
+				try {
+					noAreas = Integer.parseInt(getWord(input.get(i), 1));
+					noAreasOccur++;
+					noAreasValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for noAreas.			noAreas is of type Integer");
+					noAreasValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("stopTime")) {
+			  	try {
+			  		stopTime 	= Float.parseFloat(getWord(input.get(i), 1)) * 60 * 60;
+					stopTimeOccur++;
+					stopTimeValid = true;
+			  	}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for stopTime.			stopTime is of type Float");
+					stopTimeValid = false;
+				}
+			} else if (getWord(input.get(i), 0).equals("warmUpTime")) {
+				try {
+					warmUpTime 	= Float.parseFloat(getWord(input.get(i), 1))  * 60 * 60;
+					warmUpTimeOccur++;
+					warmUpTimeValid = true;
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for warmUpTime.		warmUpTime is of type Float");
+					warmUpTimeValid = false;
+				}
+			}
+			// Store Area Maps    ||
+			 else if (getWord(input.get(i), 0).equals("areaIdx")) {
+				int areaIdx			= 0;
+				float serviceFreq	= 0;
+				float thresholdVal	= 0;
+				int noBins 			= 0;
+				int validCount		= 0;
+				// areaIdx      ||
+			  	 try {
+			  		areaIdx 		= Integer.parseInt(getWord(input.get(i), 1));
+			  		validCount++;
+			  	 }
+			  	 catch (NumberFormatException e) {
+			  		System.err.println("Error: " + getWord(input.get(i), 1) + " is not a valid type for areaIdx. areaIdx is of type Integer");
+
+			  	 }
+			  	// serviceFreq  ||
+			  	 try {
+			  		serviceFreq 	= Float.parseFloat(getWord(input.get(i), 3));
+			  		validCount++;
+			  	 }
+			  	 catch (NumberFormatException e) {
+			  		System.err.println("Error: " + getWord(input.get(i), 3) + " is not a valid type for serviceFreq. serviceFreq is of type Float");
+			  	 }
+			  	// thresholdVal ||
+			  	 try {
+			  		thresholdVal 	= Float.parseFloat(getWord(input.get(i), 5));
+			  		validCount++;
+			  	 }
+			  	 catch (NumberFormatException e) {
+			  		System.err.println("Error: " + getWord(input.get(i), 5) + " is not a valid type for thresholdVal. thresholdVal is of type Float");
+			  	 }
+			  	// noBins       ||
+			  	 try {
+			  		noBins			= Integer.parseInt(getWord(input.get(i), 7));
+			  		validCount++;
+			  	 }
+			  	 catch (NumberFormatException e) {
+			  		System.err.println("Error: " + getWord(input.get(i), 7) + " is not a valid type for noBins. noBins is of type Integer");
+			  	 }
+			  	 System.err.println();
+			  	if (validCount == 4){
+			  		int[][] roadMatrix 	= new int[noBins+1][noBins+1];
+			  		// Move down input until you reach next roadsLayout
+			  		while (!getWord(input.get(i), 0).equals("roadsLayout")) {
+			  			i++;
+			  		}
+			  		// Populate roadMatrix \\
+			  		if (getWord(input.get(i), 0).equals("roadsLayout") && ((i + 1 + noBins + 1)<=input.size())) {
+			  			i++;
+			  			for (int j=0; j < (noBins+1); j++) {
+			  				for (int k=0; k < (noBins+1); k++) {
+			  					try {
+			  						roadMatrix[j][k] = Integer.parseInt(getWord(input.get(i + j), k));
+									this.areaMapsValid = true;
+			  					}
+			  					catch (NumberFormatException e) {
+			  						System.err.println("Error: areaIdx " + areaIdx + "'s roadsLayout could not be parsed. Either an element is not of type Integer, or mismatch in noBins and size of roadsLayout matrix");
+			  						this.areaMapsValid = false;
+			  					}
+			  				}
+			  			}
+			  		} else {
+			  			System.err.println("Error: areaIdx " + areaIdx + "'s roadsLayout dimensions are smaller than noBins");
+			  		}
+			  		// Save area map to array \\
+			  		if (globaLserviceFreqFOUND) {
+			  			areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, globaLserviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+			  			areaMatricesArray.add(currentAreaMatrix);
+			  		} else {
+				  		areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+				  		areaMatricesArray.add(currentAreaMatrix);
+			  		}
+			  	} else {
+			 		System.err.println("Error: Area Map could not be created to due one or more of the errors above");
+			 }
+		   	}
+		   	
+		}	
+		inputWarnings();
+	}
+	
+	public String getWord(String sentence, int x) {
+		String[] words = sentence.split("\\$|\\s+");
+		int size = 0;
+		for (int i = 0; i <words.length; i++) {
+			if (!words[i].equals("")) {
+				size++;
+			}
+		}
+		String[] output = new String[size];
+		int count = 0;
+		for (int i = 0; i <words.length; i++) {
+			if (!words[i].equals("")) {
+				output[count] = words[i];
+				count++;
+			}
+		}
+		return output[x];
 	}
 
 	public void initValidVars() {

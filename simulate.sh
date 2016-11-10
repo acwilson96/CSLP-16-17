@@ -30,15 +30,49 @@ if [[ "$runProg" == 2 ]]
 	then
 		echo "Starting simulation with flag <tests>"
 		echo ""
-		echo "Starting grids.txt"
-		java simStart FILES/grids.txt > FILES/gridsOUTPUT.txt
-		echo "Finished grids.txt"
-		echo "Starting input.txt"
-		java simStart FILES/input.txt > FILES/inputOUTPUT.txt
-		echo "Finished input.txt"
-		echo "Starting invalid.txt"
-		java simStart FILES/invalid.txt > FILES/invalidOUTPUT.txt
-		echo "Finished invalid.txt"
+		echo "inv_empty_input"
+		java simStart inputs/inv_empty_input.txt > outputs/inv_empty_input_OUT.txt
+		echo ""
+		echo ""
+		echo "inv_exp_input"
+		java simStart inputs/inv_exp_input.txt > outputs/inv_exp_input_OUT.txt
+		echo ""
+		echo ""
+		echo "inv_exp_input2"
+		java simStart inputs/inv_exp_input2.txt > outputs/inv_exp_input2_OUT.txt
+		echo ""
+		echo ""
+		echo "inv_exp_input3"
+		java simStart inputs/inv_exp_input3.txt > outputs/inv_exp_input3_OUT.txt
+				echo ""
+		echo ""
+		echo "inv_vartypes_input"
+		java simStart inputs/inv_vartypes_input.txt > outputs/inv_vartypes_input_OUT.txt
+		echo ""
+		echo ""
+		echo "invalid0"
+		java simStart inputs/invalid0.txt > outputs/invalid0_OUT.txt		
+		echo ""
+		echo ""
+		echo "v_grid_input"
+		java simStart inputs/v_grid_input.txt > outputs/v_grid_input_OUT.txt
+				echo ""
+		echo ""
+		echo "v_grid_input2"
+		java simStart inputs/v_grid_input2.txt > outputs/v_grid_input2_OUT.txt
+				echo ""
+		echo ""
+		echo "v_handout_input"
+		java simStart inputs/v_handout_input.txt > outputs/v_handout_input_OUT.txt
+				echo ""
+		echo ""
+		echo "v_w_input1"
+		java simStart inputs/v_w_input1.txt > outputs/v_w_input1_OUT.txt
+				echo ""
+		echo ""
+		echo "valid_default_input"
+		java simStart inputs/valid_default_input.txt > outputs/valid_default_input_OUT.txt
+
 fi
 if [[ "$runProg" == 3 ]]
 	then

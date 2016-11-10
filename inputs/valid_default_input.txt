@@ -1,3 +1,5 @@
+#default input that will be parsed and run easily
+
 lorryVolume 20
 lorryMaxLoad 7000
 binServiceTime 130
