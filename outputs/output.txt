@@ -1,0 +1,14 @@
+Warning: more than one instance of lorryVolume was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of lorryMaxLoad was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of binServiceTime was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of binVolume was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of disposalDistrRate was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of disposalDistrShape was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of bagVolume was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of bagWeightMin was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of bagWeightMax was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of noAreas was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of stopTime was detected. The one used will be the one that appears latest in the input.
+Warning: more than one instance of warmUpTime was detected. The one used will be the one that appears latest in the input.
+
+lorryVolume 20
