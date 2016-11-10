@@ -1,4 +1,4 @@
-# valid input testing removal of comment lines
+# invalid input testing existence of 0’s in roadsLayout
 
 lorryVolume 20
 lorryMaxLoad 7000

@@ -1,4 +1,4 @@
-# Used to test multiple grids of different sizes with invalid 0 elements
+# invalid input testing existence of 0’s in multiple roadsLayouts
 
 stopTime 168
 warmUpTime 16.0

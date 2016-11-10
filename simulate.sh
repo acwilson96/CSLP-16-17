@@ -36,7 +36,7 @@ if [[ "$runProg" == 2 ]]
 		java simStart inputs/inv_exp_input.txt > outputs/inv_exp_input_OUT.txt
 		echo ""
 		echo ""
-		echo "inv_exp_input2------------"
+		echo "------------inv_exp_input2------------"
 		java simStart inputs/inv_exp_input2.txt > outputs/inv_exp_input2_OUT.txt
 		echo ""
 		echo ""
@@ -44,12 +44,24 @@ if [[ "$runProg" == 2 ]]
 		java simStart inputs/inv_exp_input3.txt > outputs/inv_exp_input3_OUT.txt
 		echo ""
 		echo ""
+		echo "------------inv_exp_input4------------"
+		java simStart inputs/inv_exp_input4.txt > outputs/inv_exp_input4_OUT.txt
+		echo ""
+		echo ""
+		echo "------------inv_grid_zero_input------------"
+		java simStart inputs/inv_grid_zero_input.txt > outputs/inv_grid_zero_input_OUT.txt
+		echo ""
+		echo ""
+		echo "------------inv_grid_zero_input2------------"
+		java simStart inputs/inv_grid_zero_input2.txt > outputs/inv_grid_zero_input_OUT2.txt
+		echo ""
+		echo ""
 		echo "------------inv_vartypes_input------------"
 		java simStart inputs/inv_vartypes_input.txt > outputs/inv_vartypes_input_OUT.txt
 		echo ""
 		echo ""
-		echo "------------invalid0------------"
-		java simStart inputs/invalid0.txt > outputs/invalid0_OUT.txt		
+		echo "------------inv_w_input2------------"
+		java simStart inputs/inv_w_input2.txt > outputs/inv_w_input2_OUT.txt
 		echo ""
 		echo ""
 		echo "------------v_grid_input------------"
@@ -68,8 +80,8 @@ if [[ "$runProg" == 2 ]]
 		java simStart inputs/v_w_input1.txt > outputs/v_w_input1_OUT.txt
 		echo ""
 		echo ""
-		echo "------------v_w_input2------------"
-		java simStart inputs/v_w_input2.txt > outputs/v_w_input2_OUT.txt
+		echo "------------valid_comment_input------------"
+		java simStart inputs/valid_comment_input.txt > outputs/valid_comment_input_OUT.txt
 		echo ""
 		echo ""
 		echo "------------valid_default_input------------"
