@@ -5,6 +5,7 @@ class simStart {
 		Simulator cslp = new Simulator(args);
 		cslp.parseInput();
 		if (cslp.checkInput()) {
+			cslp.inputWarnings();
 			cslp.simOutline();	
 		}
 	}

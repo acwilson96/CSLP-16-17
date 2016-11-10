@@ -317,7 +317,6 @@ class Simulator {
 			  	 catch (NumberFormatException e) {
 			  		System.err.println("Error: " + getWord(input.get(i), 7) + " is not a valid type for noBins. noBins is of type Integer");
 			  	 }
-			  	 System.err.println();
 			  	if (validCount == 4){
 			  		int[][] roadMatrix 	= new int[noBins+1][noBins+1];
 			  		// Move down input until you reach next roadsLayout
@@ -356,12 +355,10 @@ class Simulator {
 		   	}
 		   	
 		}	
-		inputWarnings();
 	}
 	
 	public boolean checkInput() {
 		boolean output = true;
-		System.err.println();
 		// Check every required variable has a value
 		 if (!lorryVolumeValid) {
 			System.err.println("Error: Invalid input file provided. Parameter 'lorryVolume'		missing. The simulation will terminate.");
@@ -416,8 +413,6 @@ class Simulator {
 			System.err.println("Error: Invalid input file provided. Please check the area maps are valid");
 			output = false;
 		 }
-
-		System.err.println();
 		// Check for valid values
 		// No negatives or 0's
 		 if (lorryVolume <= 0) {
@@ -461,7 +456,14 @@ class Simulator {
 		 	System.err.println("Error: bagWeightMax cannot be less than bagWeightMin");
 		 	output = false;
 		 }
-		 
+		// Check for rogue tokens
+		 for (int i = 0; i < input.size(); i++) {
+		 	String nextToken = getWord(input.get(i), 0);
+		 	if (!validTokens.contains(nextToken) && !isNumerical(nextToken)){
+		 		System.out.println("Error: Unknown token found on line " + i + ": " + nextToken + ". Simulation will terminate.");
+		 		output = false;
+		 	}
+		 }
 		return output;
 	}
 
@@ -516,13 +518,7 @@ class Simulator {
 			System.out.println("Warning: warmUpTime is more than stopTime");
 		}
 		System.out.println();
-		// Check for rogue tokens
-		 for (int i = 0; i < input.size(); i++) {
-		 	String nextToken = getWord(input.get(i), 0);
-		 	if (!validTokens.contains(nextToken) && !isNumerical(nextToken)){
-		 		System.out.println("Warning: Unknown token found on line " + i + ": " + nextToken);
-		 	}
-		 }
+		
 	}
 
 
