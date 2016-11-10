@@ -3,7 +3,8 @@ import java.lang.*;
 
 class Simulator {
 
-
+	// ArrayList of input file, where each String in the ArrayList is a line of input file, excluding commented lines.
+	public static ArrayList<String> input;
 
 	// Variables that should be defined in input file
 	 public static int lorryVolume;
@@ -16,10 +17,10 @@ class Simulator {
 	 public static float bagWeightMin;
 	 public static float bagWeightMax;
 	 public static int noAreas;
-	 public static ArrayList<areaMapMatrix> areaMatricesArray = new ArrayList<areaMapMatrix>();
 	 public static float stopTime;
 	 public static float warmUpTime;
 	 public static float globaLserviceFreq;
+	 private ArrayList<String> validTokens = new ArrayList<String>();
 
 	// Valid variable declarations
 	 private boolean lorryVolumeValid;
@@ -51,29 +52,25 @@ class Simulator {
 	 private int stopTimeOccur;
 	 private int warmUpTimeOccur;
 
-	// Variables to track events
+	// Variables to track events and areas
 	 public static int currTime;
-	 public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	 public boolean eventsExist;
+	 public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
+	 public static ArrayList<areaMapMatrix> areaMatricesArray = new ArrayList<areaMapMatrix>();
 
-	public static ArrayList<String> input;
-	private ArrayList<String> validTokens = new ArrayList<String>();
+	
+	
+	
 
 
 
 	public Simulator(String args[]) {
-		// Read input file, ArrayList input = list of words in input file.
-		//readfile r = new readfile();
-		//r.openFile(args[0]);
-		//input = r.readFile();
-		//r.closeFile();
+		// Initialise some variables required to run simulator
 		this.currTime = 0;
 		eventsExist = true;
-
-		// TEST
+		// Create a new readfile object, and use said object to create ArrayList of input file
 		readfile s = new readfile();
-		input = s.readFile2(args[0]);
-		//
+		input = s.readFile(args[0]);
 	}
 
 
@@ -131,9 +128,9 @@ class Simulator {
 
 	public void parseInput() {
 		initValidVars();
-		// Loop through every word in the input file.
+		// Loop through every line in the input file.
 		for (int i = 0; i < input.size(); i++) {			
-			// If the word = a keyword such as a variable, store the next value
+			// If the first word in the line = a keyword such as a variable, store the next value
 			// Standard Variables ||
 			if (getWord(input.get(i), 0).equals("lorryVolume")) {
 				try {
@@ -276,8 +273,10 @@ class Simulator {
 					warmUpTimeValid = false;
 				}
 			}
-			// Store Area Maps    ||
+			// Store Area Maps    || 
+			// If the keyword "areaIdx" is found, then we are at the area maps part of the input file
 			 else if (getWord(input.get(i), 0).equals("areaIdx")) {
+			 	// Initialise current area's variables
 				int areaIdx			= 0;
 				float serviceFreq	= 0;
 				float thresholdVal	= 0;
@@ -316,6 +315,7 @@ class Simulator {
 			  	 catch (NumberFormatException e) {
 			  		System.err.println("Error: " + getWord(input.get(i), 7) + " is not a valid type for noBins. noBins is of type Integer");
 			  	 }
+			  	// If areaIdx, serviceFreq, thresholdVal, noBins were succesfully parsed:
 			  	if (validCount == 4){
 			  		int[][] roadMatrix 	= new int[noBins+1][noBins+1];
 			  		// Move down input until you reach next roadsLayout
@@ -323,8 +323,10 @@ class Simulator {
 			  			i++;
 			  		}
 			  		// Populate roadMatrix \\
+			  		// If statement checks to see if there is a mismatch in size of input, and size of array. This avoids exceptions.
 			  		if (getWord(input.get(i), 0).equals("roadsLayout") && ((i + 1 + noBins + 1)<=input.size())) {
 			  			i++;
+			  			// Loop through the next (noBins + 1) lines, where the integer values for the roadsLayout should be
 			  			for (int j=0; j < (noBins+1); j++) {
 			  				for (int k=0; k < (noBins+1); k++) {
 			  					try {
@@ -341,6 +343,7 @@ class Simulator {
 			  			System.err.println("Error: areaIdx " + areaIdx + "'s roadsLayout dimensions are smaller than noBins");
 			  		}
 			  		// Save area map to array \\
+			  		// If experimental serviceFreq was found, then use that value.
 			  		if (globaLserviceFreqFOUND) {
 			  			areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, globaLserviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
 			  			areaMatricesArray.add(currentAreaMatrix);
@@ -455,7 +458,7 @@ class Simulator {
 		 	System.err.println("Error: bagWeightMax cannot be less than bagWeightMin");
 		 	output = false;
 		 }
-		// Check for rogue tokens
+		// Check for rogue parameters, which will exclude lines beginning with numbers, so that roadLayouts aren't flagged as Errors
 		 for (int i = 0; i < input.size(); i++) {
 		 	String nextToken = getWord(input.get(i), 0);
 		 	if (!validTokens.contains(nextToken) && !isNumerical(nextToken)){
@@ -464,8 +467,10 @@ class Simulator {
 		 	}
 		 }
 		// Check area maps have no 0 entries outside of diagonal
+		 //Loop through all areas
 		 for (int i = 0; i < areaMatricesArray.size(); i++) {
 		 	int arrayLength = areaMatricesArray.get(i).noBins + 1;
+		 	//Loop through the roadLayour matrix of that area
 		 	for (int j = 0; j < arrayLength; j++) {
 		 		for (int k = 0; k < arrayLength; k++) {
 		 			if (j!=k && areaMatricesArray.get(i).roadsLayout[j][k] == 0) {
@@ -475,7 +480,6 @@ class Simulator {
 		 		}
 		 	}
 		 }
-
 		return output;
 	}
 
@@ -545,6 +549,7 @@ class Simulator {
 		 		}
 			}
 		 }
+		// Print a new line to seperate warnings from actual simulation.
 		System.out.println();
 	}
 
@@ -553,8 +558,9 @@ class Simulator {
 	public void simOutline() {
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
-			// Determine if events exist
+			// Determine if events exist, otherwise break the currTime < stopTime loop for efficiency
 			if (eventsExist) {
+				// Call chooseNextEvent() to determine the next event and then trigger it
 				Event nextEvent = chooseNextEvent();
 				triggerNextEvent(nextEvent);
 			} else { break; }
@@ -583,8 +589,6 @@ class Simulator {
 	}
 
 	public Event chooseNextEvent() {
-		for (int i = 0; i < nextPossEvents.size(); i++) {
-		}
 		// Initialise the output Event to be the first in the list of saved events.
 		int lowestDelay		 =	nextPossEvents.get(0).getDelay();
 		int lowestDelayIndex =	0;
@@ -609,8 +613,8 @@ class Simulator {
 			int areaNum				= nextEvent.areaNo;
 			// binX.disposeBag() returns weight of bag disposed and updates binX's volume and weight
 			float bagWeight 		= getBin(areaNum, binNum).disposeBag();
-			float binVol 			= (float) Math.round(getBin(areaNum, binNum).currVol * 10) /10;
-			float binWeight			= (float) Math.round(getBin(areaNum, binNum).currWeight * 10) /10;
+			float binVol 			= (float) Math.round(getBin(areaNum, binNum).currVol * 1000) /1000;
+			float binWeight			= (float) Math.round(getBin(areaNum, binNum).currWeight * 1000) /1000;
 			// Output information about bag disposed event
 			String bagOutput		= timeToString() + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
 			String binOutput 		= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
@@ -631,7 +635,10 @@ class Simulator {
 			// Update this bin's time of next disposal
 			getBin(areaNum, binNum).updateDisposalInterval(currTime);
 		}
+		// More events will be added here
 	}
+
+
 
 	// Supporting functions
 	public String timeToString() { // Returns current system time as a string
@@ -652,7 +659,7 @@ class Simulator {
 		return output;
 	}
 
-	public String getWord(String text, int x) {
+	public String getWord(String text, int x) { // Returns String that is word x of String text
 		String[] words = text.split("\\$|\\s+");
 		int size = 0;
 		for (int i = 0; i <words.length; i++) {
@@ -671,7 +678,7 @@ class Simulator {
 		return output[x];
 	}
 
-	public String[] getWords(String text) {
+	public String[] getWords(String text) { // Returns String array of words in a text
 		String[] words = text.split("\\$|\\s+");
 		int size = 0;
 		for (int i = 0; i <words.length; i++) {
@@ -690,7 +697,7 @@ class Simulator {
 		return output;
 	}
 
-	public boolean isNumerical(String text) {
+	public boolean isNumerical(String text) { // Determines if a String is numerical. i.e. it can only contain [-,0-9,.]
 		boolean output;
 		output = text.matches("-?\\d+(\\.\\d+)?");
 		return output;

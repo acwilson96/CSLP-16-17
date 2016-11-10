@@ -48,7 +48,7 @@ class bin {
 	public float disposeBag() { // Updates instance with new weight and volume, and returns the weight of bag just disposed.
 		this.currVol	=	this.currVol + bagVolume;
 		float bagWeight = 	(float) (Math.random() * (bagWeightMax - bagWeightMin)) + bagWeightMin;
-		bagWeight 		= 	(float) Math.round(bagWeight * 10) /10;
+		bagWeight 		= 	(float) Math.round(bagWeight * 1000) /1000;
 		this.currWeight	=	this.currWeight + bagWeight;
 		return bagWeight;
 	}
