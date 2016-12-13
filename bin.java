@@ -62,9 +62,11 @@ class bin {
 		this.timeOfNextBag		=	(int) numSecToNext + currTime;
 	}
 
-	public void serviceBin() {
+	public void serviceBin(int time) {
 		this.currVol 			=	0;
 		this.currWeight			=	0;
+		this.thresholdReported  = false;
+		this.overflowReported 	= false;
 	}
 
 	public boolean isThresholdExceeded() { // Returns whether the threshold has been exceeded

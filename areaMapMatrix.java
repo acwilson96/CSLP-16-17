@@ -87,7 +87,6 @@ class areaMapMatrix {
 	}
 	// Returns time until lorry leaves current bin.
 	public int timeUntilNextDeparture(int time) {
-		//recalculateTimeOfDeparture(time);
 		return this.timeOfDeparture - time;
 	}
 	// Will update system to tell it if the bin lorry can depart for service or not.
@@ -115,7 +114,7 @@ class areaMapMatrix {
 			}
 		}
 		if (goToDepotMidService) {
-			this.timeOfArrival = timeFrom(departBin, 0);
+			this.timeOfArrival = this.currTime + timeFrom(departBin, 0);
 			this.timeOfDeparture = 999999999;
 			lorry.departedBin(departBin, 0, 0, 0);
 			return;
@@ -134,12 +133,13 @@ class areaMapMatrix {
 		}else {
 			dptBinWeight = getBin(departBin).currWeight;
 			dptBinVolume = getBin(departBin).currVol;
-			getBin(departBin).serviceBin();
+			getBin(departBin).serviceBin(this.currTime);
 		}
 		// Get next bin to go to.
 		int nextBin = nextBin(departBin);
 		// Update lorry telling it where to go and how much waste its collected from last bin.
 		lorry.departedBin(departBin, dptBinWeight, dptBinVolume, nextBin);
+		lorry.didService = true;
 		// Update system with next event times.
 		this.timeOfArrival		= this.currTime + timeFrom(departBin, nextBin);
 		this.timeOfDeparture 	= 999999999; // Lorry just departed, wont be departed again before arriving. This value gets overwritten anyway.
@@ -158,17 +158,20 @@ class areaMapMatrix {
 				// This bin will overflow lorry
 				// Update departure time to be instantaneous.
 				// Raise flags that lorry should return to depot and that bruteForce was interrupted.
+				lorry.interruptedBin 		= arriveBin;
+				lorry.didService 			= false;
 				this.timeOfDeparture 		= this.currTime;
 				this.bruteForceInterrupted 	= true;
 				this.goToDepotMidService 	= true;
 			}
 			// If we are arriving at depot at end of schedule.
 			if (arriveBin == 0 && bruteForceService.size() < 1) {
-				// 	TODO: Update system with end of schedule results.
 				this.readyForNextService = true;
 				this.servicesCompleted++;
 				this.timeOfDeparture = this.currTime + delayToNextService();
 				this.canDepart = false;
+				lorry.currVolume = 0;
+				lorry.currWeight = 0;
 			}
 			// If we are arriving at depot mid service.
 			if (arriveBin == 0 && bruteForceService.size() > 0) {
@@ -176,9 +179,10 @@ class areaMapMatrix {
 				this.timeOfDeparture = this.currTime + 5*binServiceTime;
 				lorry.currVolume = 0;
 				lorry.currWeight = 0;
-				// TODO: Update brute force schedule.
 				ArrayList<Integer> remainingBins = bruteForceService;
 				remainingBins.remove(remainingBins.size() - 1);
+				remainingBins.add(lorry.interruptedBin);
+				
 				this.bruteForceService = createBruteForceService(remainingBins);
 			}
 		}else{
@@ -186,6 +190,8 @@ class areaMapMatrix {
 				// This bin will overflow lorry
 				// Update departure time to be instantaneous.
 				// Raise flags that lorry should return to depot and that bruteForce was interrupted.
+				lorry.interruptedBin 		= arriveBin;
+				lorry.didService 			= false;
 				this.timeOfDeparture 		= this.currTime;
 				this.goToDepotMidService 	= true;
 			}
@@ -195,6 +201,7 @@ class areaMapMatrix {
 			}
 			// If we are arriving at depot mid service.
 			if (arriveBin == 0 && dynamicService.size() > 0) {
+				dynamicService.add(lorry.interruptedBin);
 				goToDepotMidService = false;
 				this.timeOfDeparture = this.currTime + 5*binServiceTime;
 				lorry.currVolume = 0;
@@ -206,6 +213,8 @@ class areaMapMatrix {
 				this.servicesCompleted++;
 				this.timeOfDeparture = this.currTime + delayToNextService();
 				this.canDepart = false;
+				lorry.currVolume = 0;
+				lorry.currWeight = 0;
 			}
 
 		}
@@ -247,7 +256,7 @@ class areaMapMatrix {
 	// Decides if the route will be brute forced or calculated on the go and sets up bins to visit.
 	public void setUpService() {
 		this.binsNeedingServiced = binsOfNextService();
-		if (binsNeedingServiced.size() > 10) {
+		if (binsNeedingServiced.size() < 10) {
 			this.bruteForcing 		= true;
 			this.bruteForceService 	= createBruteForceService(binsNeedingServiced);	
 		}else{
@@ -305,7 +314,7 @@ class areaMapMatrix {
 	}
 	// Time between two bins
 	public int timeFrom(int bin1, int bin2) {
-		return (fwRoadsLayout[bin1][bin2] *60*60);
+		return (fwRoadsLayout[bin1][bin2] *60);
 	}
 	// Calculates cost of running a route.
 	public int costOfRoute(ArrayList<Integer> serviceRoute) {
@@ -446,10 +455,10 @@ class areaMapMatrix {
 	// Returns time to next departure/service.
 	public int delayToNextService() {
 		int offset = (this.serviceInterval * (this.servicesCompleted + 1)) - this.currTime;
-		if (offset >= 0) {
+		if (offset > 5*binServiceTime) {
 			return offset;
 		}else{
-			return 0;
+			return (5*binServiceTime);
 		}
 	}
 

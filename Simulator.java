@@ -595,18 +595,12 @@ class Simulator {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			// Loop through all the bins in said area.
 			for (int j = 1; j <= currNoBins; j++) {
-				// Check to see if current bin can have valid disposal(i.e. bin has not overflowed)
-				if (!getBin(i,j).isBinOverflowed()) {
-					// Store the time until each bin in that area has a bag disposed.
-					int delay = getBin(i,j).timeUntilNextDisposal(currTime);
-					Event nextEvent = new Event(1, i, j, delay);
-					nextPossEvents.add(nextEvent);
-				}
+				// Store the time until each bin in that area has a bag disposed.
+				int delay = getBin(i,j).timeUntilNextDisposal(currTime);
+				Event nextEvent = new Event(1, i, j, delay);
+				nextPossEvents.add(nextEvent);
 			}
 		}
-		
-		//System.out.println("I am checking for departure events");
-		//System.out.println("Sim currTime           = " + this.currTime);
 		// Check for lorry events
 		for (int i = 0; i < noAreas; i++) {
 			//System.out.println("areaMapMatrix currTime = " + getArea(i).currTime);
@@ -639,11 +633,6 @@ class Simulator {
 				lowestDelayIndex	= i;
 			}
 		}
-		/*
-		for (int i = 0; i < nextPossEvents.size(); i++) {
-			System.out.println(nextPossEvents.get(i).toString());
-		}
-		*/
 		return nextPossEvents.get(lowestDelayIndex);
 	}
 
@@ -662,9 +651,10 @@ class Simulator {
 			// Output information about bag disposed event
 			String bagOutput		= timeToString() + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
 			String binOutput 		= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
-			//System.out.println(bagOutput);
-			//System.out.println(binOutput);
-
+			System.out.println(bagOutput);
+			if (!getBin(areaNum, binNum).isBinOverflowed()) {
+				System.out.println(binOutput);
+			}
 			// Check to see if the bins volume exceeds a threshold or if the bin is overflowing
 			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
 					String threshOutput		= timeToString() + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
@@ -701,8 +691,8 @@ class Simulator {
 			int areaNum 			= nextEvent.areaNo;
 			// Update area and its lorry with arrival event.
 			getArea(areaNum).lorryDeparted(this.currTime, binNum);
-			float currLorryWeight 	= getLorry(areaNum).currWeight;
-			float currLorryVolume	= getLorry(areaNum).currVolume;
+			float currLorryWeight 	= (float) Math.round(getLorry(areaNum).currWeight * 1000) / 1000;
+			float currLorryVolume	= (float) Math.round(getLorry(areaNum).currVolume * 1000) / 1000;
 			// Output info regarding arrival
 			String binEmptyOutput	= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became 0 kg and contents volume 0 m^3";
 			String lorryFillOutput  = timeToString() + " -> load of lorry " + areaNum + " became " + currLorryWeight + " kg and contents volume " + currLorryVolume + " m^3";
@@ -710,9 +700,12 @@ class Simulator {
 			if (getArea(areaNum).canDepart) {
 				if (binNum == 0) {
 					System.out.println(departOutput);
+					//System.out.println();
 				}else{
-					System.out.println(binEmptyOutput);
-					System.out.println(lorryFillOutput);
+					if (getLorry(areaNum).didService) {
+						System.out.println(binEmptyOutput);
+						System.out.println(lorryFillOutput);
+					}
 					System.out.println(departOutput);
 				}
 			}

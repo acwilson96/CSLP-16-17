@@ -24,6 +24,9 @@ class binLorry {
 		public int lastBin;
 		public int currentBin;
 		public int nextBin;
+		public int interruptedBin;
+
+		public boolean didService;
 
 		public binLorry(int areaIdx, int roadsLayout[][], float lorryVolume, float lorryMaxLoad, int binServiceTime, float serviceFreq, int noBins) {
 			this.currentBin 	= 	0;
@@ -38,6 +41,8 @@ class binLorry {
 			this.noBins 		= 	noBins;
 			this.currWeight		=	0;
 			this.currVolume		=	0;
+
+			this.didService 	= true;
 
 			this.isInService	=	false;
 			this.isCollecting	=	false;
