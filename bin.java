@@ -46,10 +46,12 @@ class bin {
 	}
 
 	public float disposeBag() { // Updates instance with new weight and volume, and returns the weight of bag just disposed.
-		this.currVol	=	this.currVol + bagVolume;
 		float bagWeight = 	(float) (Math.random() * (bagWeightMax - bagWeightMin)) + bagWeightMin;
 		bagWeight 		= 	(float) Math.round(bagWeight * 1000) /1000;
-		this.currWeight	=	this.currWeight + bagWeight;
+		if (!isBinOverflowed()) {
+			this.currVol	=	this.currVol + bagVolume;
+			this.currWeight	=	this.currWeight + bagWeight;
+		}
 		return bagWeight;
 	}
 
@@ -58,8 +60,11 @@ class bin {
 		double numHourToNext	=	-1 * this.erlangMean * Math.log(rand());
 		double numSecToNext		=	3600 * numHourToNext;
 		this.timeOfNextBag		=	(int) numSecToNext + currTime;
-		
+	}
 
+	public void serviceBin() {
+		this.currVol 			=	0;
+		this.currWeight			=	0;
 	}
 
 	public boolean isThresholdExceeded() { // Returns whether the threshold has been exceeded

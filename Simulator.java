@@ -345,10 +345,10 @@ class Simulator {
 			  		// Save area map to array \\
 			  		// If experimental serviceFreq was found, then use that value.
 			  		if (globaLserviceFreqFOUND) {
-			  			areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, globaLserviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+			  			areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, globaLserviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax, lorryVolume, lorryMaxLoad, binServiceTime, warmUpTime, stopTime);
 			  			areaMatricesArray.add(currentAreaMatrix);
 			  		} else {
-				  		areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax);
+				  		areaMapMatrix currentAreaMatrix = new areaMapMatrix(currTime, areaIdx, serviceFreq, thresholdVal, noBins, roadMatrix, binVolume, disposalDistrRate, disposalDistrShape, bagVolume, bagWeightMin, bagWeightMax, lorryVolume, lorryMaxLoad, binServiceTime, warmUpTime, stopTime);
 				  		areaMatricesArray.add(currentAreaMatrix);
 			  		}
 			  	} else {
@@ -590,7 +590,7 @@ class Simulator {
 	public void determineSetOfEvents() {
 		// Clear possible events so that old events don't interfere and create infinite loop of same event being triggered.
 		nextPossEvents.clear();
-		// Loop through all the areas
+		// Check for disposal events
 		for (int i = 0; i < noAreas; i++) {
 			int currNoBins = areaMatricesArray.get(i).noBins;
 			// Loop through all the bins in said area.
@@ -603,8 +603,27 @@ class Simulator {
 					nextPossEvents.add(nextEvent);
 				}
 			}
-
 		}
+		
+		//System.out.println("I am checking for departure events");
+		//System.out.println("Sim currTime           = " + this.currTime);
+		// Check for lorry events
+		for (int i = 0; i < noAreas; i++) {
+			//System.out.println("areaMapMatrix currTime = " + getArea(i).currTime);
+			int arriveDelay = getArea(i).timeUntilNextArrival(currTime);
+			//System.out.println("arriveDelay = " + arriveDelay);
+			int departDelay = getArea(i).timeUntilNextDeparture(currTime);
+			//System.out.println("departDelay = " + departDelay);
+			if (arriveDelay < departDelay) {
+				Event nextEvent = new Event(2, i, getLorry(i).nextBin, arriveDelay);
+				nextPossEvents.add(nextEvent);
+			} else {
+				//System.out.println("Creating departing event");
+				Event nextEvent = new Event(3, i, getLorry(i).lastBin, departDelay);
+				nextPossEvents.add(nextEvent);
+			}
+		}
+		
 		if (nextPossEvents.size() == 0) { eventsExist = false; }
 	}
 
@@ -620,11 +639,16 @@ class Simulator {
 				lowestDelayIndex	= i;
 			}
 		}
+		/*
+		for (int i = 0; i < nextPossEvents.size(); i++) {
+			System.out.println(nextPossEvents.get(i).toString());
+		}
+		*/
 		return nextPossEvents.get(lowestDelayIndex);
 	}
 
 	public void triggerNextEvent(Event nextEvent) {
-		// Bag disposed in bin event.
+		// Bag disposed in bin.
 		if (nextEvent.eventType == 1) {
 			// Update system time to catch up to this event.
 			this.currTime = this.currTime + nextEvent.getDelay();
@@ -638,8 +662,8 @@ class Simulator {
 			// Output information about bag disposed event
 			String bagOutput		= timeToString() + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
 			String binOutput 		= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
-			System.out.println(bagOutput);
-			System.out.println(binOutput);
+			//System.out.println(bagOutput);
+			//System.out.println(binOutput);
 
 			// Check to see if the bins volume exceeds a threshold or if the bin is overflowing
 			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
@@ -655,7 +679,44 @@ class Simulator {
 			// Update this bin's time of next disposal
 			getBin(areaNum, binNum).updateDisposalInterval(currTime);
 		}
-		// More events will be added here
+		// Lorry arrived at a bin.
+		if (nextEvent.eventType == 2) {
+			// Update system time to catch up to this event.
+			this.currTime = this.currTime + nextEvent.getDelay();
+			// Extract relevant data from next event to output and update system.
+			int binNum 				= nextEvent.binNo;
+			int areaNum 			= nextEvent.areaNo;
+			// Output info regarding arrival
+			String arrivalOutput 	= timeToString() + " -> lorry " + areaNum + " arrived at location " + areaNum + "." + binNum;
+			System.out.println(arrivalOutput);
+			// Update area and its lorry with arrival event.
+			getArea(areaNum).lorryArrived(this.currTime, binNum);
+		}
+		// Lorry departed from a bin(Implies lorry emptied bin).
+		if (nextEvent.eventType == 3) {
+			// Update system time to catch up to this event.
+			this.currTime = this.currTime + nextEvent.getDelay();
+			// Extract relevant data from next event to output and update system.
+			int binNum 				= nextEvent.binNo;
+			int areaNum 			= nextEvent.areaNo;
+			// Update area and its lorry with arrival event.
+			getArea(areaNum).lorryDeparted(this.currTime, binNum);
+			float currLorryWeight 	= getLorry(areaNum).currWeight;
+			float currLorryVolume	= getLorry(areaNum).currVolume;
+			// Output info regarding arrival
+			String binEmptyOutput	= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became 0 kg and contents volume 0 m^3";
+			String lorryFillOutput  = timeToString() + " -> load of lorry " + areaNum + " became " + currLorryWeight + " kg and contents volume " + currLorryVolume + " m^3";
+			String departOutput		= timeToString() + " -> lorry " + areaNum + " left location " + areaNum + "." + binNum;
+			if (getArea(areaNum).canDepart) {
+				if (binNum == 0) {
+					System.out.println(departOutput);
+				}else{
+					System.out.println(binEmptyOutput);
+					System.out.println(lorryFillOutput);
+					System.out.println(departOutput);
+				}
+			}
+		}
 	}
 
 
@@ -674,8 +735,18 @@ class Simulator {
 		return output;
 	}
 
+	public areaMapMatrix getArea(int areaNo) {
+		areaMapMatrix output = areaMatricesArray.get(areaNo);
+		return output;
+	}
+
 	public bin getBin(int areaNo, int binNo) { // Returns bin number binNo in area number areaNo
-		bin output = areaMatricesArray.get(areaNo).binList.get(binNo);
+		bin output = getArea(areaNo).binList.get(binNo);
+		return output;
+	}
+
+	public binLorry getLorry(int areaNo) {
+		binLorry output = getArea(areaNo).lorry;
 		return output;
 	}
 

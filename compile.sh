@@ -6,3 +6,5 @@ javac bin.java
 javac Event.java
 javac simStart.java
 javac Simulator.java
+javac serviceList.java
+javac binLorry.java

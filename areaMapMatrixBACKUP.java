@@ -24,25 +24,27 @@ class areaMapMatrix {
 	public float warmUpTime;
 	public float stopTime;
 
+	public int[][] fwRoadsLayout;
+
+	public boolean readyForNextService;
+	public boolean startServiceFlag;
+
+	public boolean bruteForceInterrupted;
+
 	public ArrayList<Integer> binsNeedingServiced 	= new ArrayList<Integer>();
 	public ArrayList<Integer> bruteForceService 	= new ArrayList<Integer>();
 	public ArrayList<Integer> dynamicService		= new ArrayList<Integer>();
 	public boolean bruteForcing;
 
 	// Used for calculating brute force.
-	public int[][] fwRoadsLayout;
 	public ArrayList<serviceList> possibleRoutes	= new ArrayList<serviceList>();
 
-	// For tracking state of service/lorry.
-	public boolean bruteForceInterrupted;
-	public boolean canDepart;
-	public boolean readyForNextService;
-	public boolean goToDepotMidService;
-	public int servicesCompleted;
+	public ArrayList<Integer> serviceScheduleTimes 	= new ArrayList<Integer>();
 
-	// For tracking events.
 	public int timeOfArrival;
 	public int timeOfDeparture;
+	
+	public boolean canDepart;
 	
 	public areaMapMatrix(int currTime, int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax, float lorryVolume, float lorryMaxLoad, int binServiceTime, float warmUpTime, float stopTime) {
 		this.currTime			= currTime;
@@ -62,22 +64,33 @@ class areaMapMatrix {
 		this.binServiceTime		= binServiceTime;
 		this.warmUpTime			= warmUpTime;
 		this.stopTime			= stopTime;
+
 		setUpBins();
+
+		this.bruteForceInterrupted = false;
+
 		this.lorry 				= new binLorry(areaIdx, roadsLayout, lorryVolume, lorryMaxLoad, binServiceTime, serviceFreq, noBins);
-		this.fwRoadsLayout 		= floydWarshallRoads(); // Will create a referencable NxN matrix where element (i,j) is the shortest path from bin i to bin j
+		
 		this.serviceInterval	= (int)(3600.0/serviceFreq); 	// How long in seconds between services.
-	
-		// Initialise this so that first departure happens at time of first service, since we know that no bins will be serviceable at time = 0.
+		this.serviceScheduleTimes = setupServiceTimes();
+
+		this.readyForNextService = true;
+		this.canDepart			= true;
 		this.timeOfDeparture 	= currTime + this.serviceInterval;
 		this.timeOfArrival		= this.timeOfDeparture + 1; // Make sure that the first event a lorry can trigger is a departure event.
 
-		this.readyForNextService 	= true;
-		this.goToDepotMidService	= false;
-		this.canDepart 				= false;
+		this.startServiceFlag 	= true;
 
-		this.servicesCompleted 	= 0;
+		System.out.println("timeOfDeparture = " + this.timeOfDeparture);
+		System.out.println("timeOfArrival   = " + this.timeOfArrival);
+
+		this.fwRoadsLayout 		= floydWarshallRoads(); // Will create a referencable NxN matrix where element (i,j) is the shortest path from bin i to bin j
 	}
 
+	// Updates system
+	public void updateSystemTime(int time) {
+		this.currTime = time;
+	}
 
 
 	// Used to pass info to Simulator.java
@@ -87,178 +100,135 @@ class areaMapMatrix {
 	}
 	// Returns time until lorry leaves current bin.
 	public int timeUntilNextDeparture(int time) {
-		//recalculateTimeOfDeparture(time);
 		return this.timeOfDeparture - time;
 	}
-	// Will update system to tell it if the bin lorry can depart for service or not.
-	public void checkIfCanDepart() {
-		ArrayList<Integer> binsNeedingServiced = binsOfNextService();
-		if (binsNeedingServiced.size() < 1) {
-			this.canDepart = false;
-		}else{
-			this.canDepart = true;
-		}
-	}
+
 
 	// Used to update simulation.
 	// Update system upon lorry departuring binNumber.
 	public void lorryDeparted(int time, int departBin) {
-		this.currTime 	= time;
+		this.currTime = time;
 		float dptBinWeight;
 		float dptBinVolume;
-		if (!canDepart) {
-			checkIfCanDepart();
-			if (!canDepart) {
-				this.timeOfDeparture	= this.timeOfDeparture + serviceInterval;
-				this.timeOfArrival		= this.timeOfDeparture + 1;
-				return; 
-			}
-		}
-		if (goToDepotMidService) {
-			this.timeOfArrival = timeFrom(departBin, 0);
-			this.timeOfDeparture = 999999999;
-			lorry.departedBin(departBin, 0, 0, 0);
-			return;
-		}
 		// If leaving depot.
 		if (departBin == 0) {
-			dptBinWeight = 0;
+			dptBinWeight = 0; 
 			dptBinVolume = 0;
-			// If its start of a new service
-			if (readyForNextService) {
-				// Mark that we have started a new service and are not ready for a new one.
-				readyForNextService = false;
+			// If start of next service.
+			if (readyForNextService()) {
 				setUpService();
+				System.out.println("Number bins needing serviced = " + this.binsNeedingServiced.size());
+				if (this.binsNeedingServiced.size()<1) {
+					return;
+				}
+				readyForNextService = false;
 			}
 		// If leaving regular bin.
-		}else {
-			dptBinWeight = getBin(departBin).currWeight;
+		}else{
+			dptBinWeight = getBin(departBin).currWeight; 
 			dptBinVolume = getBin(departBin).currVol;
 			getBin(departBin).serviceBin();
 		}
 		// Get next bin to go to.
-		int nextBin = nextBin(departBin);
-		// Update lorry telling it where to go and how much waste its collected from last bin.
+		int nextBin = nextBin(departBin, lorry.currWeight, lorry.currVolume);
+		// Update Lorry telling it where to go.
 		lorry.departedBin(departBin, dptBinWeight, dptBinVolume, nextBin);
 		// Update system with next event times.
 		this.timeOfArrival		= this.currTime + timeFrom(departBin, nextBin);
-		this.timeOfDeparture 	= 999999999; // Lorry just departed, wont be departed again before arriving. This value gets overwritten anyway.
+		this.timeOfDeparture	= 999999999; // The lorry has just departed, cant depart again before arriving. This value gets OVERWRITTEN upon arrival anyway.
 	}
 	// Update system upon lorry arrival at binNumber.
 	public void lorryArrived(int time, int arriveBin) {
-		// By default update system so that if its a regular bin, the currTime and departure time are updated.
-		this.currTime 			= time;
-		this.timeOfDeparture 	= this.currTime + binServiceTime;
-		this.timeOfArrival 		= 999999999;
-		lorry.lastBin = arriveBin;
-		// Now do checks for special circumstances like [Bin will exceed lorry capacity, End of schedule].
+		// Update simulator
+		this.currTime = time;
+		this.timeOfDeparture = this.currTime + binServiceTime;
 		if (bruteForcing) {
-			//if either (lorryvol + currbinvol) or (lorryweight + currbinweight) exceeds their threshold
-			if (((lorry.currWeight + getBin(arriveBin).currWeight) > lorry.lorryMaxLoad) || ((lorry.currVolume + getBin(arriveBin).currVol) > lorry.lorryVolume)) {
-				// This bin will overflow lorry
-				// Update departure time to be instantaneous.
-				// Raise flags that lorry should return to depot and that bruteForce was interrupted.
-				this.timeOfDeparture 		= this.currTime;
-				this.bruteForceInterrupted 	= true;
-				this.goToDepotMidService 	= true;
-			}
-			// If we are arriving at depot at end of schedule.
 			if (arriveBin == 0 && bruteForceService.size() < 1) {
-				// 	TODO: Update system with end of schedule results.
-				this.readyForNextService = true;
-				this.servicesCompleted++;
-				this.timeOfDeparture = this.currTime + delayToNextService();
-				this.canDepart = false;
-			}
-			// If we are arriving at depot mid service.
-			if (arriveBin == 0 && bruteForceService.size() > 0) {
-				goToDepotMidService = false;
+				// If we arrive at depo and its end of service, then overwrite next departure.
+				serviceScheduleTimes.remove(0);
+				this.timeOfDeparture = queryServiceSchedule();
+				startServiceFlag = true;
+			}else if (arriveBin == 0){
+				// If its pit stop
 				this.timeOfDeparture = this.currTime + 5*binServiceTime;
 				lorry.currVolume = 0;
 				lorry.currWeight = 0;
-				// TODO: Update brute force schedule.
-				ArrayList<Integer> remainingBins = bruteForceService;
-				remainingBins.remove(remainingBins.size() - 1);
-				this.bruteForceService = createBruteForceService(remainingBins);
 			}
 		}else{
-			if (((lorry.currWeight + getBin(arriveBin).currWeight) > lorry.lorryMaxLoad) || ((lorry.currVolume + getBin(arriveBin).currVol) > lorry.lorryVolume)) {
-				// This bin will overflow lorry
-				// Update departure time to be instantaneous.
-				// Raise flags that lorry should return to depot and that bruteForce was interrupted.
-				this.timeOfDeparture 		= this.currTime;
-				this.goToDepotMidService 	= true;
-			}
-			// If we have arrived at last bin in dynamicService, tell it to return to depot.
-			if (arriveBin != 0 && dynamicService.size() < 1) {
-				dynamicService.add(0);
-			}
-			// If we are arriving at depot mid service.
-			if (arriveBin == 0 && dynamicService.size() > 0) {
-				goToDepotMidService = false;
+			// If we arrive at depo and its end of service, then overwrite next departure.
+			if (arriveBin == 0 && dynamicService.size() < 1) {
+				serviceScheduleTimes.remove(0);
+				this.timeOfDeparture = queryServiceSchedule();
+			}else if (arriveBin == 0){
 				this.timeOfDeparture = this.currTime + 5*binServiceTime;
 				lorry.currVolume = 0;
 				lorry.currWeight = 0;
-			}
-			if (arriveBin == 0 && dynamicService.size() < 1) {
-				//Set up for next schedule
-				this.readyForNextService = true;
-				this.servicesCompleted++;
-				this.timeOfDeparture = this.currTime + delayToNextService();
-				this.canDepart = false;
-			}
-
+			}	
 		}
+		this.timeOfArrival = 999999999; // The lorry has just arrived, cant arrive again before departing. This value gets OVERWRITTEN upon departure anyway.
 	}
 	// Returns next bin to be visited and updates system
-	public int nextBin(int lastBin) {
+	public int nextBin(int lastBin, float lorryWeight, float lorryVolume) {
 		int output;
 		if (bruteForcing) {
-			// output = next planned bin.
-			if (goToDepotMidService) {
-				goToDepotMidService = false;
-				return 0;
+			// If the brute force was interrupted(i.e. we at depot)
+			if (bruteForceInterrupted) {
+				bruteForceInterrupted = false;
+				ArrayList<Integer> remainingBruteForce 	= bruteForceService;
+				this.bruteForceService 					= createBruteForceService(remainingBruteForce);
 			}
-			/*
-			for (int i = 0; i < bruteForceService.size(); i++) {
-				System.out.println("Schedule bin " + i + " = " + bruteForceService.get(i));
-			}
-			*/
 			output = bruteForceService.get(0);
-			bruteForceService.remove(0);
-			/*
-			System.out.println();
-			for (int i = 0; i < bruteForceService.size(); i++) {
-				System.out.println("Schedule bin " + i + " = " + bruteForceService.get(i));
-			}
-			*/
-		}else{
-			// output = next planned bin.
-			if (goToDepotMidService) {
-				goToDepotMidService = false;
+			System.out.println(output);
+			if (willExceedLorry(output)) {
+				this.bruteForceInterrupted = true;
 				return 0;
 			}
+			bruteForceService.remove(0);
+			// If we are going to our last bin(i.e. the depot)
+			if (bruteForceService.size() < 1) {
+				this.readyForNextService = true;
+			}
+		} else {
 			output = nextNearestBin(lastBin, dynamicService);
+			if (willExceedLorry(output)) {
+				return 0;
+			}
 			dynamicService.remove(Integer.valueOf(output));
+			// If we are going to our last bin(i.e. the depot)
+			if (dynamicService.size() < 1) {
+				this.readyForNextService = true;
+				dynamicService.add(0); // We have departed and heading to final bin, so we can add the depot to the list of bins to visit now since we know it is the only bin it can visit.
+			}
 		}
 		return output;
 	}
 
+	
 	// Decides if the route will be brute forced or calculated on the go and sets up bins to visit.
 	public void setUpService() {
 		this.binsNeedingServiced = binsOfNextService();
-		if (binsNeedingServiced.size() > 10) {
+		if (binsNeedingServiced.size() < 50) {
 			this.bruteForcing 		= true;
-			this.bruteForceService 	= createBruteForceService(binsNeedingServiced);	
-		}else{
+			this.bruteForceService 	= createBruteForceService(binsNeedingServiced);
+			if (this.bruteForceService.size() < 1) {
+				this.canDepart = false;
+			}else{
+				this.canDepart = true;
+			}
+		} else {
 			this.bruteForcing 		= false;
 			this.dynamicService 	= createDynamicService(binsNeedingServiced);
+			if (this.dynamicService.size() < 1) {
+				this.canDepart = false;
+			}else{
+				this.canDepart = true;
+			}
 		}
 	}
 	// Updates ArrayList with bins needing serviced.
 	public ArrayList<Integer> binsOfNextService() {
 		ArrayList<Integer> output = new ArrayList<Integer>();
-		for (int i = 1; i <= noBins; i++) {
+		for (int i = 1; i < noBins; i++) {
 			if (binList.get(i).isThresholdExceeded()) {
 				output.add(i);
 			}
@@ -293,6 +263,31 @@ class areaMapMatrix {
 		// Returns just a list of bins needing services since the next bin is chosen intelligently.
 		return binsToBeDynamicd;
 	}
+
+
+	// Supporting Functions:
+	// Returns whether the lorry has finished a service and is ready to receive new one.
+	public boolean readyForNextService() {
+		if (bruteForcing) {
+			if (bruteForceService.size() < 1) {
+				return true;
+			}
+		} else {
+			if (dynamicService.size() < 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+	// Turns a list into a string
+	public String listToString(ArrayList<Integer> input) {
+		String output = "[";
+		for (int i = 0; i < input.size(); i++) {
+			output = output + input.get(i) + ", ";
+		}
+		output = output + "]";
+		return output;
+	}
 	// Returns bin number of nearest bin to the last bin/current bin.
 	public int nextNearestBin(int currBin, ArrayList<Integer> binsToBeServiced) {
 		int tempNextBin = binsToBeServiced.get(0);
@@ -306,6 +301,57 @@ class areaMapMatrix {
 	// Time between two bins
 	public int timeFrom(int bin1, int bin2) {
 		return (fwRoadsLayout[bin1][bin2] *60*60);
+	}
+	// Returns bin binNumber.
+	public bin getBin(int binNumber) { // Returns bin number binNo in area number areaNo
+		bin output = binList.get(binNumber);
+		return output;
+	}
+	// Returns the time of the next schedule
+	public int queryServiceSchedule() {
+		int timeOfNextService = serviceScheduleTimes.get(0);
+		if (this.currTime > timeOfNextService) {
+			return currTime;
+		}else{
+			return timeOfNextService;
+		}
+	}
+	// Will this bin exceed lorrys capacity
+	public boolean willExceedLorry(int binNumber) {
+		if ( ((lorry.currWeight + getBin(binNumber).currWeight) > lorry.lorryMaxLoad) || ((lorry.currVolume + getBin(binNumber).currVol) > lorry.lorryVolume) ) {
+			return true;
+		}else{
+			return false;
+		}
+	}
+	// Will return a 2d array where '-1' is replaced by +ve infinity
+	public int[][] adjustedRoadsLayout(int[][] roadsLayout) {
+		int[][] output = roadsLayout;
+		for (int i = 0; i < output.length; i++) {
+			for (int j = 0; j < output.length; j++) {
+				if (output[i][j] == -1) {
+					output[i][j] = 999999999;
+				}
+			}
+		}
+		return output;
+	}
+	// Returns factorial value of an int.
+	public int fact(int fact) {
+		int output = 1;
+		for (int i = 1; i <= fact; i++) {
+			output = output * i;
+		}
+		return output;
+	}
+	// Takes an ArrayList<Integer> and returns equivalent int[]
+	public int[] listToArray(ArrayList<Integer> input) {
+		int size = input.size();
+		int[] output = new int[size];
+		for (int i = 0; i < size; i++) {
+			output[i] = input.get(i);
+		}
+		return output;
 	}
 	// Calculates cost of running a route.
 	public int costOfRoute(ArrayList<Integer> serviceRoute) {
@@ -344,14 +390,6 @@ class areaMapMatrix {
 	    }
 	}
 
-
-
-
-
-	
-
-
-
 	
 	// Initialisation.
 	// Initialise all bins.
@@ -380,78 +418,15 @@ class areaMapMatrix {
 	// Initialise list of times for schedules.
 	private ArrayList<Integer> setupServiceTimes() {
 		ArrayList<Integer> output = new ArrayList<Integer>();
-		int scheduleTime = 0;
+		int timeCounter = 0;
 		int numberSchedules = (int)(stopTime/serviceInterval);
 		for (int i = 0; i < numberSchedules; i++) {
-			scheduleTime = scheduleTime + serviceInterval;
-			output.add(scheduleTime);
+			output.add(timeCounter);
+			timeCounter = timeCounter + serviceInterval;
 		}
 		return output;
 	}
-	// Will return a 2d array where '-1' is replaced by +ve infinity
-	public int[][] adjustedRoadsLayout(int[][] roadsLayout) {
-		int[][] output = roadsLayout;
-		for (int i = 0; i < output.length; i++) {
-			for (int j = 0; j < output.length; j++) {
-				if (output[i][j] == -1) {
-					output[i][j] = 999999999;
-				}
-			}
-		}
-		return output;
-	}
-
-
-
-	// Supporting Functions:
-	// Turns a list into a string
-	public String listToString(ArrayList<Integer> input) {
-		String output = "[";
-		for (int i = 0; i < input.size(); i++) {
-			output = output + input.get(i) + ", ";
-		}
-		output = output + "]";
-		return output;
-	}
-	// Returns bin binNumber.
-	public bin getBin(int binNumber) { // Returns bin number binNo in area number areaNo
-		bin output = binList.get(binNumber);
-		return output;
-	}
-	// Will this bin exceed lorrys capacity
-	public boolean willExceedLorry(int binNumber) {
-		if ( ((lorry.currWeight + getBin(binNumber).currWeight) > lorry.lorryMaxLoad) || ((lorry.currVolume + getBin(binNumber).currVol) > lorry.lorryVolume) ) {
-			return true;
-		}else{
-			return false;
-		}
-	}
-	// Returns factorial value of an int.
-	public int fact(int fact) {
-		int output = 1;
-		for (int i = 1; i <= fact; i++) {
-			output = output * i;
-		}
-		return output;
-	}
-	// Takes an ArrayList<Integer> and returns equivalent int[]
-	public int[] listToArray(ArrayList<Integer> input) {
-		int size = input.size();
-		int[] output = new int[size];
-		for (int i = 0; i < size; i++) {
-			output[i] = input.get(i);
-		}
-		return output;
-	}
-	// Returns time to next departure/service.
-	public int delayToNextService() {
-		int offset = (this.serviceInterval * (this.servicesCompleted + 1)) - this.currTime;
-		if (offset >= 0) {
-			return offset;
-		}else{
-			return 0;
-		}
-	}
+	
 
 
 
