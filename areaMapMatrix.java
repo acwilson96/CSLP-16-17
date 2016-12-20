@@ -105,7 +105,7 @@ class areaMapMatrix {
 
 
 
-	// Used to pass info to Simulator.java class.
+	// Used to communicate with Simulator.java class.
 	// Returns time until lorry arrives at bin.
 	public int timeUntilNextArrival(int time) {
 		return this.timeOfArrival - time;
@@ -113,6 +113,21 @@ class areaMapMatrix {
 	// Returns time until lorry leaves current bin.
 	public int timeUntilNextDeparture(int time) {
 		return this.timeOfDeparture - time;
+	}
+	// Update system with new values due to experimentation/
+	public void updateExperiment(float nextDistRate, int nextDistrShape, float nextServiceFreq) {
+		this.disposalDistrRate  = nextDistRate;
+		this.disposalDistrShape	= nextDistrShape;
+		this.serviceFreq 		= nextServiceFreq;
+		this.serviceInterval 	= (int)(3600.0/serviceFreq);
+		this.timeOfDeparture 	= 0 + this.serviceInterval;
+		this.timeOfArrival		= this.timeOfDeparture + 1; 
+		for (int i = 0; i <= this.noBins; i++) {
+			this.binList.get(i).disposalDistrRate 	= nextDistRate;
+			this.binList.get(i).disposalDistrShape	= nextDistrShape;
+			this.binList.get(i).erlangMean 			= nextDistrShape / nextDistRate;
+			this.binList.get(i).updateDisposalInterval(0);
+		}
 	}
 
 	
@@ -393,7 +408,6 @@ class areaMapMatrix {
 	        this.possibleRoutes.add(nextList);
 	        return;
 	    }
-
 	    for(int i = index; i < arr.length; i++){ //For each index in the sub array arr[index...end]
 
 	        //Swap the elements at indices index and i

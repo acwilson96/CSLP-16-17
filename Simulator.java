@@ -58,13 +58,19 @@ class Simulator {
 	 public ArrayList<Event> nextPossEvents = new ArrayList<Event>();
 	 public static ArrayList<areaMapMatrix> areaMatricesArray = new ArrayList<areaMapMatrix>();
 
-	
-	
-	
+	// Experiment support.	
+	private boolean output;
+	public boolean containsExperiment;
+	public int numberExperiments;
+	public int numberOfDistrRate;
+	public int numberOfDistrShape;
+	public int numberOfServiceFreq;
+	public ArrayList<Float> disposalDistrRateExp = new ArrayList<Float>();
+	public ArrayList<Integer> disposalDistrShapeExp = new ArrayList<Integer>();
+	public ArrayList<Float> serviceFreqExp = new ArrayList<Float>();
 
 
-
-	public Simulator(int expNumb, String args[]) {
+	public Simulator(String args[]) {
 		// Initialise some variables required to run simulator
 		this.currTime = 0;
 		eventsExist = true;
@@ -124,6 +130,11 @@ class Simulator {
 		 noAreasOccur			= 0;
 		 stopTimeOccur			= 0;
 		 warmUpTimeOccur		= 0;
+
+		 numberExperiments		= 0;
+		 numberOfDistrRate		= 0;
+		 numberOfDistrShape		= 0;
+		 numberOfServiceFreq	= 0;
 	}
 
 	public void parseInput() {
@@ -175,11 +186,20 @@ class Simulator {
 			} else if (getWord(input.get(i), 0).equals("disposalDistrRate")) {
 				try {
 					if (getWord(input.get(i), 1).equals("experiment")) {
-						disposalDistrRate = Float.parseFloat(getWord(input.get(i), 2));
+						this.numberOfDistrRate = countWords(input.get(i));
+						for (int x = 2; x < this.numberOfDistrRate; x++) {
+							Float val = Float.parseFloat(getWord(input.get(i), x));
+							disposalDistrRateExp.add(val);
+
+						}
+						disposalDistrRate = disposalDistrRateExp.get(0);
 						disposalDistrRateOccur++;
 						disposalDistrRateValid = true;
+						this.containsExperiment = true;
+						this.numberExperiments++;
 					} else {
 						disposalDistrRate = Float.parseFloat(getWord(input.get(i), 1));
+						disposalDistrRateExp.add(disposalDistrRate);
 						disposalDistrRateOccur++;
 						disposalDistrRateValid = true;
 					}
@@ -191,11 +211,19 @@ class Simulator {
 			} else if (getWord(input.get(i), 0).equals("disposalDistrShape")) {
 				try {
 					if (getWord(input.get(i), 1).equals("experiment")) {
-						disposalDistrShape = Integer.parseInt(getWord(input.get(i), 2));
+						this.numberOfDistrShape = countWords(input.get(i));
+						for (int x = 2; x < this.numberOfDistrShape; x++) {
+							int val = Integer.parseInt(getWord(input.get(i), x));
+							disposalDistrShapeExp.add(val);
+						}
+						disposalDistrShape = disposalDistrShapeExp.get(0);
 						disposalDistrShapeOccur++;
 						disposalDistrShapeValid = true;
+						this.containsExperiment = true;
+						this.numberExperiments++;
 					} else {
 						disposalDistrShape = Integer.parseInt(getWord(input.get(i), 1));
+						disposalDistrShapeExp.add(disposalDistrShape);
 						disposalDistrShapeOccur++;
 						disposalDistrShapeValid = true;
 					}
@@ -206,11 +234,18 @@ class Simulator {
 				}
 			} else if (getWord(input.get(i), 0).equals("serviceFreq") && getWord(input.get(i), 1).equals("experiment")) {
 				try {
-					globaLserviceFreq = Float.parseFloat(getWord(input.get(i), 2));
+					this.numberOfServiceFreq = countWords(input.get(i));
+					for (int x = 2; x < this.numberOfServiceFreq; x++) {
+						Float val = Float.parseFloat(getWord(input.get(i), x));
+						serviceFreqExp.add(val);
+					}
+					globaLserviceFreq = serviceFreqExp.get(0);
 					globaLserviceFreqFOUND = true;
+					this.containsExperiment = true;
+					this.numberExperiments++;
 				}
 				catch (NumberFormatException e) {
-					System.err.println("Error: serviceFreq found for experiment purposes, but " + getWord(input.get(i), 2) + " is not of type Float");
+					System.err.println("Error: serviceFreq found for experiment purposes, but one or more of its values are not of type Float");
 				}
 			} else if (getWord(input.get(i), 0).equals("bagVolume")) {
 				try {
@@ -294,6 +329,7 @@ class Simulator {
 			  	// serviceFreq  ||
 			  	 try {
 			  		serviceFreq 	= Float.parseFloat(getWord(input.get(i), 3));
+			  		serviceFreqExp.add(serviceFreq);
 			  		validCount++;
 			  	 }
 			  	 catch (NumberFormatException e) {
@@ -573,18 +609,40 @@ class Simulator {
 		System.out.println();
 	}
 
+	// Experimentation functions.
+	public void updateExperiment(float nextDistRate, int nextDistrShape, float nextServiceFreq, int expNumb) {
+		this.currTime = 0;
+		this.disposalDistrRate 	= nextDistRate;
+		this.disposalDistrShape = nextDistrShape;
+		for (int i = 0; i < areaMatricesArray.size(); i++) {
+			areaMatricesArray.get(i).updateExperiment(nextDistRate, nextDistrShape, nextServiceFreq);
+		}
+		String output = "Experiment #" + expNumb + ":";
+		if (disposalDistrRateExp.size() > 1) {
+			output = output + " disposalDistrRate " + nextDistRate + " ";
+		}
+		if (disposalDistrShapeExp.size()  > 1) {
+			output = output + " disposalDistrShape " + nextDistrShape + " ";
+		}
+		if (serviceFreqExp.size() > 1) {
+			output = output + " serviceFreq " + nextServiceFreq;
+		}
+		System.out.println(output);
+	}
+
 
 	// Simulation functions
-	public void simOutline() {
+	public void simOutline(boolean outputEnabled) {
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
 			// Determine if events exist, otherwise break the currTime < stopTime loop for efficiency
 			if (eventsExist) {
 				// Call chooseNextEvent() to determine the next event and then trigger it
 				Event nextEvent = chooseNextEvent();
-				triggerNextEvent(nextEvent);
+				triggerNextEvent(nextEvent, outputEnabled);
 			} else { break; }
-		}		System.out.println("---");
+		}
+		System.out.println("---");
 		calculateStatistics();
 		System.out.println("---");
 	}
@@ -605,16 +663,12 @@ class Simulator {
 		}
 		// Check for lorry events
 		for (int i = 0; i < noAreas; i++) {
-			//System.out.println("areaMapMatrix currTime = " + getArea(i).currTime);
 			int arriveDelay = getArea(i).timeUntilNextArrival(currTime);
-			//System.out.println("arriveDelay = " + arriveDelay);
 			int departDelay = getArea(i).timeUntilNextDeparture(currTime);
-			//System.out.println("departDelay = " + departDelay);
 			if (arriveDelay < departDelay) {
 				Event nextEvent = new Event(2, i, getLorry(i).nextBin, arriveDelay);
 				nextPossEvents.add(nextEvent);
 			} else {
-				//System.out.println("Creating departing event");
 				Event nextEvent = new Event(3, i, getLorry(i).lastBin, departDelay);
 				nextPossEvents.add(nextEvent);
 			}
@@ -638,7 +692,7 @@ class Simulator {
 		return nextPossEvents.get(lowestDelayIndex);
 	}
 
-	public void triggerNextEvent(Event nextEvent) {
+	public void triggerNextEvent(Event nextEvent, boolean outputEnabled) {
 		// Bag disposed in bin.
 		if (nextEvent.eventType == 1) {
 			// Update system time to catch up to this event.
@@ -653,20 +707,20 @@ class Simulator {
 			// Output information about bag disposed event
 			String bagOutput		= timeToString(this.currTime) + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
 			String binOutput 		= timeToString(this.currTime) + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
-			System.out.println(bagOutput);
+			if (outputEnabled) { System.out.println(bagOutput); }
 			if (!getBin(areaNum, binNum).isBinOverflowed()) {
-				System.out.println(binOutput);
+				if (outputEnabled) { System.out.println(binOutput); }
 			}
 			// Check to see if the bins volume exceeds a threshold or if the bin is overflowing
 			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
 					String threshOutput		= timeToString(this.currTime) + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
 					getBin(areaNum, binNum).thresholdReported = true;
-					System.out.println(threshOutput);
+					if (outputEnabled) { System.out.println(threshOutput); }
 			}
 			if (getBin(areaNum, binNum).isBinOverflowed()) {
 					String overflowOutput		= timeToString(this.currTime) + " -> bin " + areaNum + "." + binNum + " overflowed";
 					getBin(areaNum, binNum).overflowReported = true;
-					System.out.println(overflowOutput);
+					if (outputEnabled) { System.out.println(overflowOutput); }
 			}
 			// Update this bin's time of next disposal
 			getBin(areaNum, binNum).updateDisposalInterval(currTime);
@@ -680,7 +734,7 @@ class Simulator {
 			int areaNum 			= nextEvent.areaNo;
 			// Output info regarding arrival
 			String arrivalOutput 	= timeToString(this.currTime) + " -> lorry " + areaNum + " arrived at location " + areaNum + "." + binNum;
-			System.out.println(arrivalOutput);
+			if (outputEnabled) { System.out.println(arrivalOutput); }
 			// Update area and its lorry with arrival event.
 			getArea(areaNum).lorryArrived(this.currTime, binNum);
 		}
@@ -701,14 +755,13 @@ class Simulator {
 			String departOutput		= timeToString(this.currTime) + " -> lorry " + areaNum + " left location " + areaNum + "." + binNum;
 			if (getArea(areaNum).canDepart) {
 				if (binNum == 0) {
-					System.out.println(departOutput);
-					//System.out.println();
+					if (outputEnabled) { System.out.println(departOutput); }
 				}else{
 					if (getLorry(areaNum).didService) {
-						System.out.println(binEmptyOutput);
-						System.out.println(lorryFillOutput);
+						if (outputEnabled) { System.out.println(binEmptyOutput); }
+						if (outputEnabled) { System.out.println(lorryFillOutput); }
 					}
-					System.out.println(departOutput);
+					if (outputEnabled) { System.out.println(departOutput); }
 				}
 			}
 		}
@@ -862,6 +915,25 @@ class Simulator {
 		boolean output;
 		output = text.matches("-?\\d+(\\.\\d+)?");
 		return output;
+	}
+
+	public static int countWords(String text) {
+	    String[] words = text.split("\\$|\\s+");
+		int size = 0;
+		for (int i = 0; i <words.length; i++) {
+			if (!words[i].equals("")) {
+				size++;
+			}
+		}
+		String[] output = new String[size];
+		int count = 0;
+		for (int i = 0; i <words.length; i++) {
+			if (!words[i].equals("")) {
+				output[count] = words[i];
+				count++;
+			}
+		}
+		return output.length;
 	}
 
 }
