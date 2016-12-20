@@ -2,7 +2,7 @@ class simStart {
 	
 	public static void main(String args[]) {
 		// Create new instance of a simulator
-		Simulator cslp = new Simulator(args);
+		Simulator cslp = new Simulator(0, args);
 		// Parse input in new simulator
 		cslp.parseInput();
 		// If input is valid and can be used in simulator

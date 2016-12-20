@@ -64,7 +64,7 @@ class Simulator {
 
 
 
-	public Simulator(String args[]) {
+	public Simulator(int expNumb, String args[]) {
 		// Initialise some variables required to run simulator
 		this.currTime = 0;
 		eventsExist = true;
@@ -584,7 +584,9 @@ class Simulator {
 				Event nextEvent = chooseNextEvent();
 				triggerNextEvent(nextEvent);
 			} else { break; }
-		}
+		}		System.out.println("---");
+		calculateStatistics();
+		System.out.println("---");
 	}
 
 	public void determineSetOfEvents() {
@@ -649,20 +651,20 @@ class Simulator {
 			float binVol 			= (float) Math.round(getBin(areaNum, binNum).currVol * 1000) /1000;
 			float binWeight			= (float) Math.round(getBin(areaNum, binNum).currWeight * 1000) /1000;
 			// Output information about bag disposed event
-			String bagOutput		= timeToString() + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
-			String binOutput 		= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
+			String bagOutput		= timeToString(this.currTime) + " -> bag weighing " + bagWeight + " kg disposed of at bin " + areaNum + "." + binNum;
+			String binOutput 		= timeToString(this.currTime) + " -> load of bin " + areaNum + "." + binNum + " became " + binWeight + " kg and contents volume " + binVol + " m^3";
 			System.out.println(bagOutput);
 			if (!getBin(areaNum, binNum).isBinOverflowed()) {
 				System.out.println(binOutput);
 			}
 			// Check to see if the bins volume exceeds a threshold or if the bin is overflowing
 			if (getBin(areaNum, binNum).isThresholdExceeded() && getBin(areaNum, binNum).thresholdReported == false) {
-					String threshOutput		= timeToString() + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
+					String threshOutput		= timeToString(this.currTime) + " -> occupancy threshold of bin " + areaNum + "." + binNum + " exceeded";
 					getBin(areaNum, binNum).thresholdReported = true;
 					System.out.println(threshOutput);
 			}
 			if (getBin(areaNum, binNum).isBinOverflowed()) {
-					String overflowOutput		= timeToString() + " -> bin " + areaNum + "." + binNum + " overflowed";
+					String overflowOutput		= timeToString(this.currTime) + " -> bin " + areaNum + "." + binNum + " overflowed";
 					getBin(areaNum, binNum).overflowReported = true;
 					System.out.println(overflowOutput);
 			}
@@ -677,7 +679,7 @@ class Simulator {
 			int binNum 				= nextEvent.binNo;
 			int areaNum 			= nextEvent.areaNo;
 			// Output info regarding arrival
-			String arrivalOutput 	= timeToString() + " -> lorry " + areaNum + " arrived at location " + areaNum + "." + binNum;
+			String arrivalOutput 	= timeToString(this.currTime) + " -> lorry " + areaNum + " arrived at location " + areaNum + "." + binNum;
 			System.out.println(arrivalOutput);
 			// Update area and its lorry with arrival event.
 			getArea(areaNum).lorryArrived(this.currTime, binNum);
@@ -694,9 +696,9 @@ class Simulator {
 			float currLorryWeight 	= (float) Math.round(getLorry(areaNum).currWeight * 1000) / 1000;
 			float currLorryVolume	= (float) Math.round(getLorry(areaNum).currVolume * 1000) / 1000;
 			// Output info regarding arrival
-			String binEmptyOutput	= timeToString() + " -> load of bin " + areaNum + "." + binNum + " became 0 kg and contents volume 0 m^3";
-			String lorryFillOutput  = timeToString() + " -> load of lorry " + areaNum + " became " + currLorryWeight + " kg and contents volume " + currLorryVolume + " m^3";
-			String departOutput		= timeToString() + " -> lorry " + areaNum + " left location " + areaNum + "." + binNum;
+			String binEmptyOutput	= timeToString(this.currTime) + " -> load of bin " + areaNum + "." + binNum + " became 0 kg and contents volume 0 m^3";
+			String lorryFillOutput  = timeToString(this.currTime) + " -> load of lorry " + areaNum + " became " + currLorryWeight + " kg and contents volume " + currLorryVolume + " m^3";
+			String departOutput		= timeToString(this.currTime) + " -> lorry " + areaNum + " left location " + areaNum + "." + binNum;
 			if (getArea(areaNum).canDepart) {
 				if (binNum == 0) {
 					System.out.println(departOutput);
@@ -711,18 +713,93 @@ class Simulator {
 			}
 		}
 	}
+	public void calculateStatistics() {
+		// Calculate average trip duration.
+		float totalAvg = 0;
+		for (int i = 0; i < noAreas; i++) {
+			float areaTripDuration	=	(float)(getArea(i).totalTripDuration);
+			float areaNumberOfTrips = 	(float)(getArea(i).numberOfTrips);
+			float areaAvg 			= 	areaTripDuration/areaNumberOfTrips;
+			areaAvg = (float) Math.round(areaAvg *100)/100;
+			totalAvg = totalAvg + areaAvg;
 
+			int areaAvgInt 			=	(int)(areaAvg);
+			System.out.println("area " + i + ": average trip duration " + timeToString(areaAvgInt));
+		}
+		totalAvg = totalAvg / noAreas;
+		int outputTotalAvg = (int)(totalAvg);
+		totalAvg = (float) Math.round(totalAvg *100)/100;
+		System.out.println("overall average trip duration " + timeToString(outputTotalAvg));
+
+		// Calculate number of trips per schedule.
+		totalAvg = 0;
+		for (int i = 0; i < noAreas; i++) {
+			float areaTripsStarted		=	(float)(getArea(i).numberOfTripsStarted);
+			float areaServicesStarted 	= 	(float)(getArea(i).servicesStarted);
+			float areaAvg 				= 	areaTripsStarted/areaServicesStarted;
+			areaAvg = (float) Math.round(areaAvg *100)/100;
+			totalAvg = totalAvg + areaAvg;
+
+			System.out.println("area " + i + ": average no. trips " + areaAvg);
+		}
+		totalAvg = totalAvg / noAreas;
+		totalAvg = (float) Math.round(totalAvg *100)/100;
+		System.out.println("overall average no. trips " + totalAvg);
+
+		// Calculate trip efficiency.
+		totalAvg = 0;
+		for (int i = 0; i < noAreas; i++) {
+			float weight 	= getArea(i).totalWeightCollected;
+			float timeMins 		= (float)(getArea(i).totalTripDuration)/60;
+			float areaAvg 	= weight / timeMins;
+			areaAvg = (float) Math.round(areaAvg *100)/100;
+			System.out.println("area " + i + ": trip efficiency " + areaAvg);
+			totalAvg = totalAvg + areaAvg;
+		}
+		totalAvg = totalAvg / noAreas;
+		totalAvg = (float) Math.round(totalAvg *100)/100;
+		System.out.println("overall trip efficiency " + totalAvg);
+
+		// Calculate average volume collected.
+		totalAvg = 0;
+		for (int i = 0; i < noAreas; i++) {
+			float areaVolCollected 		=	(float)(getArea(i).totalVolumeCollected);
+			float areaNumberOfTrips		= 	(float)(getArea(i).numberOfTrips);
+			float areaAvg 				=	areaVolCollected/areaNumberOfTrips;
+			areaAvg = (float) Math.round(areaAvg *100)/100;
+			totalAvg = totalAvg + areaAvg;
+			System.out.println("area " + i + ": average volume collected " + areaAvg);
+		}
+		totalAvg = totalAvg / noAreas;
+		totalAvg = (float) Math.round(totalAvg *100)/100;
+		System.out.println("overall average volume collected " + totalAvg);
+
+		// Calculate average percentage of overflown bins.
+		totalAvg = 0;
+		for (int i = 0; i < noAreas; i++) {
+			float areaNumBinsOverflown 		= 	(float)(getArea(i).binsOverflownAtStart);
+			float areaNumServicesStarted	=	(float)(getArea(i).servicesStarted);
+			float areaNumBins 				=	(float)(getArea(i).noBins);
+			float areaAvg 					= 	(areaNumBinsOverflown / (areaNumServicesStarted * areaNumBins))*100;
+			areaAvg = (float) Math.round(areaAvg *100)/100;
+			totalAvg = totalAvg + areaAvg;
+			System.out.println("area " + i + ": percentage of bins overflowed " + areaAvg);
+		}
+		totalAvg = totalAvg / noAreas;
+		totalAvg = (float) Math.round(totalAvg *100)/100;
+		System.out.println("overall percentage of bins overflowed " + totalAvg);
+	}
 
 
 	// Supporting functions
-	public String timeToString() { // Returns current system time as a string
-		int days 		= (int) currTime / 86400;
+	public String timeToString(int time) { // Returns current system time as a string
+		int days 		= (int) time / 86400;
 		String daysS 	= String.format("%02d", days);
-		int hours		= (int) (currTime % 86400 ) / 3600 ;
+		int hours		= (int) (time % 86400 ) / 3600 ;
 		String hoursS	= String.format("%02d", hours);
-		int minutes 	= (int) ((currTime % 86400 ) % 3600 ) / 60 ;
+		int minutes 	= (int) ((time % 86400 ) % 3600 ) / 60 ;
 		String minutesS	= String.format("%02d", minutes);
-		int seconds		= (int) ((currTime % 86400 ) % 3600 ) % 60 ;
+		int seconds		= (int) ((time % 86400 ) % 3600 ) % 60 ;
 		String secondsS = String.format("%02d", seconds);
 		String output = daysS + ":" + hoursS + ":" + minutesS + ":" + secondsS;
 		return output;

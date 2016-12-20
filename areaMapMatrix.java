@@ -4,6 +4,7 @@ class areaMapMatrix {
 	
 	public int currTime;
 
+	// Input/Initialisation defined variables.
 	public int areaIdx;
 	public float serviceFreq;
 	public float thresholdVal;
@@ -24,16 +25,18 @@ class areaMapMatrix {
 	public float warmUpTime;
 	public float stopTime;
 
+	// Lists of bins to do with servicing.
 	public ArrayList<Integer> binsNeedingServiced 	= new ArrayList<Integer>();
 	public ArrayList<Integer> bruteForceService 	= new ArrayList<Integer>();
 	public ArrayList<Integer> dynamicService		= new ArrayList<Integer>();
-	public boolean bruteForcing;
+	
 
 	// Used for calculating brute force.
 	public int[][] fwRoadsLayout;
 	public ArrayList<serviceList> possibleRoutes	= new ArrayList<serviceList>();
 
 	// For tracking state of service/lorry.
+	public boolean bruteForcing;
 	public boolean bruteForceInterrupted;
 	public boolean canDepart;
 	public boolean readyForNextService;
@@ -43,6 +46,17 @@ class areaMapMatrix {
 	// For tracking events.
 	public int timeOfArrival;
 	public int timeOfDeparture;
+
+	// For statistics.
+	public int totalTripDuration;
+	public int numberOfTrips;
+	public int numberOfTripsStarted;
+	public int currentTripStart;
+	public float totalWeightCollected;
+	public float totalVolumeCollected;
+	public int servicesStarted;
+	public int binsOverflownAtStart;
+
 	
 	public areaMapMatrix(int currTime, int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax, float lorryVolume, float lorryMaxLoad, int binServiceTime, float warmUpTime, float stopTime) {
 		this.currTime			= currTime;
@@ -64,23 +78,34 @@ class areaMapMatrix {
 		this.stopTime			= stopTime;
 		setUpBins();
 		this.lorry 				= new binLorry(areaIdx, roadsLayout, lorryVolume, lorryMaxLoad, binServiceTime, serviceFreq, noBins);
-		this.fwRoadsLayout 		= floydWarshallRoads(); // Will create a referencable NxN matrix where element (i,j) is the shortest path from bin i to bin j
+		this.fwRoadsLayout 		= floydWarshallRoads(); // Will create a referencable NxN matrix where element (i,j) is the shortest path from bin i to bin j.
 		this.serviceInterval	= (int)(3600.0/serviceFreq); 	// How long in seconds between services.
 	
 		// Initialise this so that first departure happens at time of first service, since we know that no bins will be serviceable at time = 0.
 		this.timeOfDeparture 	= currTime + this.serviceInterval;
 		this.timeOfArrival		= this.timeOfDeparture + 1; // Make sure that the first event a lorry can trigger is a departure event.
 
+		// Mark that the lorry is read for a service by default, but it should still check to see if there are bins to be serviced(canDepart).
 		this.readyForNextService 	= true;
 		this.goToDepotMidService	= false;
 		this.canDepart 				= false;
 
+		// Used to track number of services completed to find out delay until next service.
 		this.servicesCompleted 	= 0;
+		// Initialise statistics vars.
+		this.totalTripDuration 		= 0;
+		this.numberOfTrips 			= 0;
+		this.numberOfTripsStarted   = 0;
+		this.currentTripStart		= 0;
+		this.totalWeightCollected	= 0;
+		this.totalVolumeCollected	= 0;
+		this.servicesStarted 		= 0;
+		this.binsOverflownAtStart	= 0;
 	}
 
 
 
-	// Used to pass info to Simulator.java
+	// Used to pass info to Simulator.java class.
 	// Returns time until lorry arrives at bin.
 	public int timeUntilNextArrival(int time) {
 		return this.timeOfArrival - time;
@@ -89,8 +114,12 @@ class areaMapMatrix {
 	public int timeUntilNextDeparture(int time) {
 		return this.timeOfDeparture - time;
 	}
-	// Will update system to tell it if the bin lorry can depart for service or not.
+
+	
+	// Used to update simulation.
+	// Will update system to tell it if the bin lorry can depart for service or not depending on number bins needing serviced. Also updates number of bins overflown for statistics.
 	public void checkIfCanDepart() {
+
 		ArrayList<Integer> binsNeedingServiced = binsOfNextService();
 		if (binsNeedingServiced.size() < 1) {
 			this.canDepart = false;
@@ -98,21 +127,22 @@ class areaMapMatrix {
 			this.canDepart = true;
 		}
 	}
-
-	// Used to update simulation.
 	// Update system upon lorry departuring binNumber.
 	public void lorryDeparted(int time, int departBin) {
 		this.currTime 	= time;
 		float dptBinWeight;
 		float dptBinVolume;
+		// If simulator flagged that lorry cannot depart(canDepart will only ever be false at the end of a service), recheck/update the simulator to see if a departure is now valid.
 		if (!canDepart) {
 			checkIfCanDepart();
+			// If a departure is not valid, then we will be at the depot at the end of a service, and so we update time until next departure to the next scheduled service.
 			if (!canDepart) {
 				this.timeOfDeparture	= this.timeOfDeparture + serviceInterval;
 				this.timeOfArrival		= this.timeOfDeparture + 1;
 				return; 
 			}
 		}
+		// If we are returning to depot mid service.
 		if (goToDepotMidService) {
 			this.timeOfArrival = this.currTime + timeFrom(departBin, 0);
 			this.timeOfDeparture = 999999999;
@@ -123,9 +153,14 @@ class areaMapMatrix {
 		if (departBin == 0) {
 			dptBinWeight = 0;
 			dptBinVolume = 0;
-			// If its start of a new service
+			// Update statistical variables.
+			this.currentTripStart = this.currTime;
+			this.numberOfTripsStarted++;
+			// If its start of a new service.
 			if (readyForNextService) {
 				// Mark that we have started a new service and are not ready for a new one.
+				this.servicesStarted++;
+				this.binsOverflownAtStart = this.binsOverflownAtStart + numberOfOverflownBins();
 				readyForNextService = false;
 				setUpService();
 			}
@@ -146,14 +181,14 @@ class areaMapMatrix {
 	}
 	// Update system upon lorry arrival at binNumber.
 	public void lorryArrived(int time, int arriveBin) {
-		// By default update system so that if its a regular bin, the currTime and departure time are updated.
+		// By default update system as if its a regular bin, the currTime and departure time are updated.
 		this.currTime 			= time;
 		this.timeOfDeparture 	= this.currTime + binServiceTime;
 		this.timeOfArrival 		= 999999999;
 		lorry.lastBin = arriveBin;
-		// Now do checks for special circumstances like [Bin will exceed lorry capacity, End of schedule].
+		// Now do checks for special circumstances like [Bin will exceed lorry capacity, End of service, Lorry arrived at Depot mid service].
 		if (bruteForcing) {
-			//if either (lorryvol + currbinvol) or (lorryweight + currbinweight) exceeds their threshold
+			// If either (lorryvol + currbinvol) or (lorryweight + currbinweight) exceeds their threshold
 			if (((lorry.currWeight + getBin(arriveBin).currWeight) > lorry.lorryMaxLoad) || ((lorry.currVolume + getBin(arriveBin).currVol) > lorry.lorryVolume)) {
 				// This bin will overflow lorry
 				// Update departure time to be instantaneous.
@@ -166,6 +201,12 @@ class areaMapMatrix {
 			}
 			// If we are arriving at depot at end of schedule.
 			if (arriveBin == 0 && bruteForceService.size() < 1) {
+				// Update statistic variables.
+				this.numberOfTrips++;
+				this.totalTripDuration 		= this.totalTripDuration + (this.currTime - this.currentTripStart);
+				this.totalWeightCollected 	= this.totalWeightCollected + lorry.currWeight;
+				this.totalVolumeCollected	= this.totalVolumeCollected + lorry.currVolume;
+				// Update simulator.
 				this.readyForNextService = true;
 				this.servicesCompleted++;
 				this.timeOfDeparture = this.currTime + delayToNextService();
@@ -175,6 +216,12 @@ class areaMapMatrix {
 			}
 			// If we are arriving at depot mid service.
 			if (arriveBin == 0 && bruteForceService.size() > 0) {
+				// Update statistic variables.
+				this.numberOfTrips++;
+				this.totalTripDuration = this.totalTripDuration + (this.currTime - this.currentTripStart);
+				this.totalWeightCollected 	= this.totalWeightCollected + lorry.currWeight;
+				this.totalVolumeCollected	= this.totalVolumeCollected + lorry.currVolume;
+				// Update simulator.
 				goToDepotMidService = false;
 				this.timeOfDeparture = this.currTime + 5*binServiceTime;
 				lorry.currVolume = 0;
@@ -182,7 +229,6 @@ class areaMapMatrix {
 				ArrayList<Integer> remainingBins = bruteForceService;
 				remainingBins.remove(remainingBins.size() - 1);
 				remainingBins.add(lorry.interruptedBin);
-				
 				this.bruteForceService = createBruteForceService(remainingBins);
 			}
 		}else{
@@ -201,6 +247,12 @@ class areaMapMatrix {
 			}
 			// If we are arriving at depot mid service.
 			if (arriveBin == 0 && dynamicService.size() > 0) {
+				// Update statistic variables.
+				this.numberOfTrips++;
+				this.totalTripDuration = this.totalTripDuration + (this.currTime - this.currentTripStart);
+				this.totalWeightCollected 	= this.totalWeightCollected + lorry.currWeight;
+				this.totalVolumeCollected	= this.totalVolumeCollected + lorry.currVolume;
+				// Update simulator.
 				dynamicService.add(lorry.interruptedBin);
 				goToDepotMidService = false;
 				this.timeOfDeparture = this.currTime + 5*binServiceTime;
@@ -208,6 +260,12 @@ class areaMapMatrix {
 				lorry.currWeight = 0;
 			}
 			if (arriveBin == 0 && dynamicService.size() < 1) {
+				// Update statistic variables.
+				this.numberOfTrips++;
+				this.totalTripDuration = this.totalTripDuration + (this.currTime - this.currentTripStart);
+				this.totalWeightCollected 	= this.totalWeightCollected + lorry.currWeight;
+				this.totalVolumeCollected	= this.totalVolumeCollected + lorry.currVolume;
+				// Update simulator.
 				//Set up for next schedule
 				this.readyForNextService = true;
 				this.servicesCompleted++;
@@ -460,6 +518,16 @@ class areaMapMatrix {
 		}else{
 			return (5*binServiceTime);
 		}
+	}
+	// Returns number of bins overflown.
+	public int numberOfOverflownBins() {
+		int output = 0;
+		for (int i = 1; i <= noBins; i++) {
+			if (binList.get(i).isBinOverflowed()) {
+				output++;
+			}
+		}
+		return output;
 	}
 
 
