@@ -11,7 +11,6 @@ if [ $# -eq 0 ]
 		echo "        Available [options] are:"
 		echo "        tests     -     runs all the test input files"
 		echo "        file      -     outputs to file output.txt"
-		echo "        toFile    -     outputs just this to file"
 fi
 if [ "$2" == "tests" ]
 	then
@@ -20,10 +19,6 @@ fi
 if [ "$2" == "file" ]
 	then
 		runProg=3
-fi
-if ["$2" == "toFile" ]
-	then
-		runProg=4
 fi
 if [[ "$runProg" == 1 ]]
 	then
@@ -108,9 +103,5 @@ fi
 if [[ "$runProg" == 3 ]]
 	then
 		echo "Starting simulation with flag <file>"
-		java simStart $input > outputs/output.txt
-fi
-if [[ "$runProg" == 4]]
-	then
-	    java simStart $input > output.txt
+		java simStart $input > output.txt
 fi

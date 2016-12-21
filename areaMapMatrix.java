@@ -57,7 +57,7 @@ class areaMapMatrix {
 	 public int binsOverflownAtStart;
 
 	// Constructor.
-	public areaMapMatrix(int currTime, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax, float lorryVolume, float lorryMaxLoad, int binServiceTime, float warmUpTime, float stopTime) {
+	public areaMapMatrix(int currTime, int areaIdx, float serviceFreq, float thresholdVal, int noBins, int roadsLayout[][], float  binVolume, float disposalDistrRate, int disposalDistrShape, float bagVolume, float bagWeightMin, float bagWeightMax, float lorryVolume, float lorryMaxLoad, int binServiceTime, float warmUpTime, float stopTime) {
 		this.currTime			= currTime;
 		this.areaIdx 			= areaIdx;
 		this.serviceFreq 		= serviceFreq;
@@ -77,6 +77,7 @@ class areaMapMatrix {
 		this.stopTime			= stopTime;
 		this.fwRoadsLayout 		= floydWarshallRoads();
 		intialiseVariables();
+
 	}
 
 
@@ -91,8 +92,7 @@ class areaMapMatrix {
 		this.serviceInterval 	= (int)(3600.0/serviceFreq);
 		this.timeOfDeparture 	= 0 + this.serviceInterval;
 		this.timeOfArrival		= this.timeOfDeparture + 1;
-		setUpBins();		
-		this.lorry 				= new binLorry(areaIdx, lorryVolume, lorryMaxLoad, binServiceTime, serviceFreq);
+		intialiseVariables();
 	}
 	// Initialise variables for tracking state/statistics.
 	public void intialiseVariables() {
@@ -116,6 +116,8 @@ class areaMapMatrix {
 		this.totalVolumeCollected	= 0;
 		this.servicesStarted 		= 0;
 		this.binsOverflownAtStart	= 0;
+		setUpBins();
+		this.lorry 				= new binLorry(areaIdx, lorryVolume, lorryMaxLoad, binServiceTime, serviceFreq);
 	}
 	// Initialise all bins.
 	private void setUpBins() {
