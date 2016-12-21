@@ -334,7 +334,9 @@ class Simulator {
 			  	// serviceFreq  ||
 			  	 try {
 			  		serviceFreq 	= Float.parseFloat(getWord(input.get(i), 3));
-			  		serviceFreqExp.add(serviceFreq);
+			  		if (serviceFreqExp.size() < 1) {
+			  			serviceFreqExp.add(serviceFreq);
+			  		}
 			  		validCount++;
 			  	 }
 			  	 catch (NumberFormatException e) {
@@ -631,7 +633,7 @@ class Simulator {
 		if (disposalDistrShapeExp.size()  > 1) {
 			output = output + " disposalDistrShape " + nextDistrShape + " ";
 		}
-		if (serviceFreqExp.size() > 1) {
+		if (globaLserviceFreqFOUND) {
 			output = output + " serviceFreq " + nextServiceFreq;
 		}
 		System.out.println(output);
@@ -761,7 +763,10 @@ class Simulator {
 			String departOutput		= timeToString(this.currTime) + " -> lorry " + areaNum + " left location " + areaNum + "." + binNum;
 			if (getArea(areaNum).canDepart) {
 				if (binNum == 0) {
-					if (outputEnabled) { System.out.println(departOutput); }
+					if (outputEnabled) {
+						System.out.println(timeToString(this.currTime) + " -> load of lorry " + areaNum + " became 0 kg and contents volume 0 m^3");
+						System.out.println(departOutput);
+					}
 				}else{
 					if (getLorry(areaNum).didService) {
 						if (outputEnabled) { System.out.println(binEmptyOutput); }

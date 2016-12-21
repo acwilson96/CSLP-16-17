@@ -117,7 +117,7 @@ class areaMapMatrix {
 		this.servicesStarted 		= 0;
 		this.binsOverflownAtStart	= 0;
 		setUpBins();
-		this.lorry 				= new binLorry(areaIdx, lorryVolume, lorryMaxLoad, binServiceTime, serviceFreq);
+		this.lorry 				= new binLorry(areaIdx, lorryVolume, lorryMaxLoad);
 	}
 	// Initialise all bins.
 	private void setUpBins() {
@@ -376,7 +376,7 @@ class areaMapMatrix {
 	// Decides if the route will be brute forced or calculated on the go and sets up bins to visit.
 	public void setUpService() {
 		this.binsNeedingServiced = binsOfNextService();
-		if (binsNeedingServiced.size() < 10) {
+		if (binsNeedingServiced.size() < 9) {
 			this.bruteForcing 		= true;
 			this.bruteForceService 	= createBruteForceService(binsNeedingServiced);	
 		}else{

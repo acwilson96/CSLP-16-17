@@ -26,7 +26,7 @@ class binLorry {
 
 		public boolean didService;
 
-		public binLorry(int areaIdx, float lorryVolume, float lorryMaxLoad, int binServiceTime, float serviceFreq) {
+		public binLorry(int areaIdx, float lorryVolume, float lorryMaxLoad) {
 			this.currentBin 	= 	0;
 			this.lastBin		=	0;
 			this.nextBin		=	0;
@@ -37,7 +37,7 @@ class binLorry {
 			this.serviceFreq	=	serviceFreq;
 			this.currWeight		=	0;
 			this.currVolume		=	0;
-			this.didService 	= true;
+			this.didService 	= 	true;
 			this.isInService	=	false;
 			this.isCollecting	=	false;
 		}
