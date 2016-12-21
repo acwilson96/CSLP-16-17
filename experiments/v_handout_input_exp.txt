@@ -6,10 +6,14 @@ lorryMaxLoad 7000
 binServiceTime 130
 # Bin volume (cubic metres)
 binVolume 2
+
 # Rate of the Erlang distribution of the disposal events (avg. no. per hour)
-disposalDistrRate 2.0
+disposalDistrRate experiment 1.0 2.0
 # Shape of the Erlang distribution
 disposalDistrShape 2
+# Serivce frequency
+# serviceFreq experiment 0.005 0.05
+
 # Bag volume (cubic metres)
 bagVolume 0.05
 # Minimum expected weight of a waste bag disposed
