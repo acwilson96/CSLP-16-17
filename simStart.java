@@ -3,23 +3,23 @@ import java.util.*;
 class simStart {
 
 	public static void main(String args[]) {
-		// Create new instance of a simulator
+		// Create new instance of a simulator.
 		Simulator cslp = new Simulator(args);
-		// Parse input in new simulator
+		// Parse input in new simulator.
 		cslp.parseInput();
-		// Check for experimental running
+		// Check for experimental running.
 		if (!cslp.containsExperiment) {
 			// Run normally.
-			// If input is valid and can be used in simulator
+			// If input is valid and can be used in simulator.
 			if (cslp.checkInput()) {
-				// Warn about potential issues with input
+				// Warn about potential issues with input.
 				cslp.inputWarnings();
-				// Run the simulator outline
+				// Run the simulator outline with output enabled.
 				cslp.simOutline(true);	
 			}
 		}else{
-			// Run all experiments
-			int expNumb = 1;
+			// Run all experiments one by one.
+			int expNumb = 1; // Counts what experiment number we are on.
 			int noDistrRate   = cslp.disposalDistrRateExp.size();
 			int noDistrShape  = cslp.disposalDistrShapeExp.size();
 			int noServiceFreq = cslp.serviceFreqExp.size();
@@ -32,7 +32,7 @@ class simStart {
 						int nextShape		=	cslp.disposalDistrShapeExp.get(y);
 						float nextFreq		=	cslp.serviceFreqExp.get(z);
 						cslp.updateExperiment(nextRate, nextShape, nextFreq, expNumb);
-						// Run with new values
+						// Run simulator outline with output disabled.
 						cslp.simOutline(false);
 						expNumb++;
 					}

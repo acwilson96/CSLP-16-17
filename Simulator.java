@@ -4,7 +4,7 @@ import java.lang.*;
 class Simulator {
 
 	// ArrayList of input file, where each String in the ArrayList is a line of input file, excluding commented lines.
-	public static ArrayList<String> input;
+ 	public static ArrayList<String> input;
 
 	// Variables that should be defined in input file
 	 public static int lorryVolume;
@@ -59,29 +59,28 @@ class Simulator {
 	 public static ArrayList<areaMapMatrix> areaMatricesArray = new ArrayList<areaMapMatrix>();
 
 	// Experiment support.	
-	private boolean output;
-	public boolean containsExperiment;
-	public int numberExperiments;
-	public int numberOfDistrRate;
-	public int numberOfDistrShape;
-	public int numberOfServiceFreq;
-	public ArrayList<Float> disposalDistrRateExp = new ArrayList<Float>();
-	public ArrayList<Integer> disposalDistrShapeExp = new ArrayList<Integer>();
-	public ArrayList<Float> serviceFreqExp = new ArrayList<Float>();
+	 private boolean output;
+	 public boolean containsExperiment;
+	 public int numberOfDistrRate;
+	 public int numberOfDistrShape;
+	 public int numberOfServiceFreq;
+	 public ArrayList<Float> disposalDistrRateExp = new ArrayList<Float>();
+	 public ArrayList<Integer> disposalDistrShapeExp = new ArrayList<Integer>();
+	 public ArrayList<Float> serviceFreqExp = new ArrayList<Float>();
 
 
 	public Simulator(String args[]) {
-		// Initialise some variables required to run simulator
+		// Initialise some variables required to run simulator.
 		this.currTime = 0;
 		eventsExist = true;
-		// Create a new readfile object, and use said object to create ArrayList of input file
+		// Create a new readfile object, and use said object to create ArrayList of input file.
 		readfile s = new readfile();
 		input = s.readFile(args[0]);
 	}
 
 
 	// Input parsing & validation
-	public void initValidVars() {
+	public void initValidVars() { // Initialise simulator variables.
 		// ArrayList of valid Tokens
 		 validTokens.add("lorryVolume");
 		 validTokens.add("lorryMaxLoad");
@@ -130,18 +129,17 @@ class Simulator {
 		 noAreasOccur			= 0;
 		 stopTimeOccur			= 0;
 		 warmUpTimeOccur		= 0;
-
-		 numberExperiments		= 0;
+		// Experiment Variables
 		 numberOfDistrRate		= 0;
 		 numberOfDistrShape		= 0;
 		 numberOfServiceFreq	= 0;
 	}
 
-	public void parseInput() {
+	public void parseInput() { // Parses input file.
 		initValidVars();
 		// Loop through every line in the input file.
 		for (int i = 0; i < input.size(); i++) {			
-			// If the first word in the line = a keyword such as a variable, store the next value
+			// If the first word in the line = a keyword such as a variable, store the next value.
 			// Standard Variables ||
 			if (getWord(input.get(i), 0).equals("lorryVolume")) {
 				try {
@@ -187,16 +185,18 @@ class Simulator {
 				try {
 					if (getWord(input.get(i), 1).equals("experiment")) {
 						this.numberOfDistrRate = countWords(input.get(i));
+						// Loop through words in current line, storing all experiment values in an ArrayList.
 						for (int x = 2; x < this.numberOfDistrRate; x++) {
 							Float val = Float.parseFloat(getWord(input.get(i), x));
 							disposalDistrRateExp.add(val);
-
 						}
+						// To avoid initialising errors, set the current disposalDistrRate to the first value following experiment.
 						disposalDistrRate = disposalDistrRateExp.get(0);
+						// Update input validation variables.
 						disposalDistrRateOccur++;
 						disposalDistrRateValid = true;
+						// Update boolean which determines if experimentation is to be run.
 						this.containsExperiment = true;
-						this.numberExperiments++;
 					} else {
 						disposalDistrRate = Float.parseFloat(getWord(input.get(i), 1));
 						disposalDistrRateExp.add(disposalDistrRate);
@@ -212,15 +212,18 @@ class Simulator {
 				try {
 					if (getWord(input.get(i), 1).equals("experiment")) {
 						this.numberOfDistrShape = countWords(input.get(i));
+						// Loop through words in current line, storing all experiment values in an ArrayList.
 						for (int x = 2; x < this.numberOfDistrShape; x++) {
 							int val = Integer.parseInt(getWord(input.get(i), x));
 							disposalDistrShapeExp.add(val);
 						}
+						// To avoid initialising errors, set the current disposalDistrRate to the first value following experiment.
 						disposalDistrShape = disposalDistrShapeExp.get(0);
+						// Update input validation variables.
 						disposalDistrShapeOccur++;
 						disposalDistrShapeValid = true;
+						// Update boolean which determines if experimentation is to be run.
 						this.containsExperiment = true;
-						this.numberExperiments++;
 					} else {
 						disposalDistrShape = Integer.parseInt(getWord(input.get(i), 1));
 						disposalDistrShapeExp.add(disposalDistrShape);
@@ -235,14 +238,16 @@ class Simulator {
 			} else if (getWord(input.get(i), 0).equals("serviceFreq") && getWord(input.get(i), 1).equals("experiment")) {
 				try {
 					this.numberOfServiceFreq = countWords(input.get(i));
+					// Update boolean which determines if experimentation is to be run.
 					for (int x = 2; x < this.numberOfServiceFreq; x++) {
 						Float val = Float.parseFloat(getWord(input.get(i), x));
 						serviceFreqExp.add(val);
 					}
+					// To avoid initialising errors, set the current disposalDistrRate to the first value following experiment.
 					globaLserviceFreq = serviceFreqExp.get(0);
 					globaLserviceFreqFOUND = true;
+					// Update boolean which determines if experimentation is to be run.
 					this.containsExperiment = true;
-					this.numberExperiments++;
 				}
 				catch (NumberFormatException e) {
 					System.err.println("Error: serviceFreq found for experiment purposes, but one or more of its values are not of type Float");
@@ -395,7 +400,7 @@ class Simulator {
 		}	
 	}
 	
-	public boolean checkInput() {
+	public boolean checkInput() { // Checks parsed input for errors.
 		boolean output = true;
 		// Check every required variable has a value
 		 if (!lorryVolumeValid) {
@@ -539,7 +544,7 @@ class Simulator {
 		return output;
 	}
 
-	public void inputWarnings() {
+	public void inputWarnings() { // Warns user about possible conflicting values.
 		// Warn if more than one instance of a variable exists
 		 if (lorryVolumeOccur > 1) {
 			System.out.println("Warning: more than one instance of lorryVolume was detected. The one used will be the one that appears latest in the input.");
@@ -609,14 +614,16 @@ class Simulator {
 		System.out.println();
 	}
 
-	// Experimentation functions.
-	public void updateExperiment(float nextDistRate, int nextDistrShape, float nextServiceFreq, int expNumb) {
+	public void updateExperiment(float nextDistRate, int nextDistrShape, float nextServiceFreq, int expNumb) { // Updates/Resets simulator with new values for experimentation.
+		// Reset current classes time, and disposalDistrRate & disposalDistrShape.
 		this.currTime = 0;
 		this.disposalDistrRate 	= nextDistRate;
 		this.disposalDistrShape = nextDistrShape;
+		// Loop through all areas, calling the experimental update method which will reset the system with new values.
 		for (int i = 0; i < areaMatricesArray.size(); i++) {
 			areaMatricesArray.get(i).updateExperiment(nextDistRate, nextDistrShape, nextServiceFreq);
 		}
+		// Output that we are beginning an experiment.
 		String output = "Experiment #" + expNumb + ":";
 		if (disposalDistrRateExp.size() > 1) {
 			output = output + " disposalDistrRate " + nextDistRate + " ";
@@ -630,9 +637,8 @@ class Simulator {
 		System.out.println(output);
 	}
 
-
-	// Simulation functions
-	public void simOutline(boolean outputEnabled) {
+	// Simulation functions.
+	public void simOutline(boolean outputEnabled) { // Runs a loop generating, and executing simulation events while in scope of simulation time.
 		while (this.currTime < this.stopTime) {
 			determineSetOfEvents();
 			// Determine if events exist, otherwise break the currTime < stopTime loop for efficiency
@@ -647,7 +653,7 @@ class Simulator {
 		System.out.println("---");
 	}
 
-	public void determineSetOfEvents() {
+	public void determineSetOfEvents() { // Determines set of possible events in simulation.
 		// Clear possible events so that old events don't interfere and create infinite loop of same event being triggered.
 		nextPossEvents.clear();
 		// Check for disposal events
@@ -677,7 +683,7 @@ class Simulator {
 		if (nextPossEvents.size() == 0) { eventsExist = false; }
 	}
 
-	public Event chooseNextEvent() {
+	public Event chooseNextEvent() { // Chooses next event based on delay.
 		// Initialise the output Event to be the first in the list of saved events.
 		int lowestDelay		 =	nextPossEvents.get(0).getDelay();
 		int lowestDelayIndex =	0;
@@ -692,7 +698,7 @@ class Simulator {
 		return nextPossEvents.get(lowestDelayIndex);
 	}
 
-	public void triggerNextEvent(Event nextEvent, boolean outputEnabled) {
+	public void triggerNextEvent(Event nextEvent, boolean outputEnabled) { // Executes the next chosen events.
 		// Bag disposed in bin.
 		if (nextEvent.eventType == 1) {
 			// Update system time to catch up to this event.
@@ -766,7 +772,8 @@ class Simulator {
 			}
 		}
 	}
-	public void calculateStatistics() {
+	
+	public void calculateStatistics() { // Calculates required statistics and outputs them to console.
 		// Calculate average trip duration.
 		float totalAvg = 0;
 		for (int i = 0; i < noAreas; i++) {
@@ -841,11 +848,11 @@ class Simulator {
 		totalAvg = totalAvg / noAreas;
 		totalAvg = (float) Math.round(totalAvg *100)/100;
 		System.out.println("overall percentage of bins overflowed " + totalAvg);
-	}
+	} 
 
 
-	// Supporting functions
-	public String timeToString(int time) { // Returns current system time as a string
+	// Supporting functions.
+	public String timeToString(int time) { // Returns time in seconds as a string of form DD:HH:MM:SS
 		int days 		= (int) time / 86400;
 		String daysS 	= String.format("%02d", days);
 		int hours		= (int) (time % 86400 ) / 3600 ;
@@ -858,22 +865,22 @@ class Simulator {
 		return output;
 	}
 
-	public areaMapMatrix getArea(int areaNo) {
+	public areaMapMatrix getArea(int areaNo) { // Returns the areaMapMatrix class of a specified area.
 		areaMapMatrix output = areaMatricesArray.get(areaNo);
 		return output;
 	}
 
-	public bin getBin(int areaNo, int binNo) { // Returns bin number binNo in area number areaNo
+	public bin getBin(int areaNo, int binNo) { // Returns bin number binNo in area number areaNo.
 		bin output = getArea(areaNo).binList.get(binNo);
 		return output;
 	}
 
-	public binLorry getLorry(int areaNo) {
+	public binLorry getLorry(int areaNo) { // Returns the lorry of a specified area.
 		binLorry output = getArea(areaNo).lorry;
 		return output;
 	}
 
-	public String getWord(String text, int x) { // Returns String that is word x of String text
+	public String getWord(String text, int x) { // Returns String that is word x of String text.
 		String[] words = text.split("\\$|\\s+");
 		int size = 0;
 		for (int i = 0; i <words.length; i++) {
@@ -892,7 +899,7 @@ class Simulator {
 		return output[x];
 	}
 
-	public String[] getWords(String text) { // Returns String array of words in a text
+	public String[] getWords(String text) { // Returns String array of words in a text.
 		String[] words = text.split("\\$|\\s+");
 		int size = 0;
 		for (int i = 0; i <words.length; i++) {
@@ -917,7 +924,7 @@ class Simulator {
 		return output;
 	}
 
-	public static int countWords(String text) {
+	public static int countWords(String text) { // Returns number of words in a string.
 	    String[] words = text.split("\\$|\\s+");
 		int size = 0;
 		for (int i = 0; i <words.length; i++) {

@@ -77,7 +77,6 @@ class bin {
 	public boolean isBinOverflowed() { // Returns whether the bin has overflowed
 		if (this.currVol > binVolume) 		{ return true;  }
 		else 								{ return false; }
-	
 	}
 
 	public double rand() { // Generates random number between 0 and 1 exclusive
